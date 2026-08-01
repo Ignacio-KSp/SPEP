@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://bly3ntkobadu6"]
+
+[ext_resource type="Script" uid="uid://dxdhjh1s826gp" path="res://cohete.gd" id="1_pe05s"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_n0ykk"]
+radius = 10.0
+height = 20.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ws11t"]
+radius = 10.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ws11t"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ws11t"]
+
+[node name="Mundo" type="Node3D" unique_id=1484331012]
+
+[node name="Planeta" type="StaticBody3D" parent="." unique_id=1518082037]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Planeta" unique_id=1204523599]
+mesh = SubResource("SphereMesh_n0ykk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1595319784]
+shape = SubResource("SphereShape3D_ws11t")
+
+[node name="Cohete" type="RigidBody3D" parent="." unique_id=1559797509]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.888378, 0)
+script = ExtResource("1_pe05s")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Cohete" unique_id=1109961845]
+mesh = SubResource("CylinderMesh_ws11t")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Cohete" unique_id=267470374]
+shape = SubResource("CylinderShape3D_ws11t")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1910803421]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=179136704]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
