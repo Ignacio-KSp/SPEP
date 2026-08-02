@@ -1,31 +1,43 @@
 [gd_scene format=3 uid="uid://bly3ntkobadu6"]
 
-[ext_resource type="Script" uid="uid://dxdhjh1s826gp" path="res://cohete.gd" id="1_pe05s"]
+[ext_resource type="Script" uid="uid://dxdhjh1s826gp" path="res://cohete.gd" id="1_lgngo"]
+[ext_resource type="Script" uid="uid://draumge2n2xss" path="res://camera_seguimiento.gd" id="2_fw4w5"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pe05s"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_xvatj"]
+radius = 1000.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_n0ykk"]
-radius = 10.0
-height = 20.0
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_ws11t"]
-radius = 10.0
+radius = 1000.0
+height = 2000.0
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_ws11t"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_ws11t"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_ws11t"]
+
 [node name="Mundo" type="Node3D" unique_id=1484331012]
 
 [node name="Planeta" type="StaticBody3D" parent="." unique_id=1518082037]
+physics_material_override = SubResource("PhysicsMaterial_pe05s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta" unique_id=1595319784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -201.13165, -387.26654, -63.029724)
+shape = SubResource("SphereShape3D_xvatj")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Planeta" unique_id=1204523599]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -207.4505, -393.4346, -60.614044)
 mesh = SubResource("SphereMesh_n0ykk")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1595319784]
-shape = SubResource("SphereShape3D_ws11t")
-
-[node name="Cohete" type="RigidBody3D" parent="." unique_id=1559797509]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.888378, 0)
-script = ExtResource("1_pe05s")
+[node name="Cohete" type="RigidBody3D" parent="." unique_id=1559797509 node_paths=PackedStringArray("hud_label")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -114.14209, 623.17413, 0)
+script = ExtResource("1_lgngo")
+hud_label = NodePath("../CanvasLayer/HUD")
+altura_atmosfera = 5000.0
+fuerza_empuje_max = 1000.0
+potencia_rcs = 80.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Cohete" unique_id=1109961845]
 mesh = SubResource("CylinderMesh_ws11t")
@@ -35,5 +47,20 @@ shape = SubResource("CylinderShape3D_ws11t")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1910803421]
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=179136704]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=179136704 node_paths=PackedStringArray("objetivo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
+script = ExtResource("2_fw4w5")
+objetivo = NodePath("../Cohete")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1994683057]
+
+[node name="HUD" type="Label" parent="CanvasLayer" unique_id=583324332]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -18.0
+offset_top = -7.0
+offset_right = 22.0
+offset_bottom = 16.0
+grow_horizontal = 2
+label_settings = SubResource("LabelSettings_ws11t")
