@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://g3bfpui4vnr2"]
+[gd_scene format=3 uid="uid://djl3yycy5dsdx"]
 
 [ext_resource type="Script" uid="uid://dxdhjh1s826gp" path="res://cohete.gd" id="1_lgngo"]
 [ext_resource type="Script" uid="uid://b8400q654d3ih" path="res://planeta.gd" id="1_otwa2"]
@@ -131,10 +131,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3681641, 0)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1224654292]
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1244693703 node_paths=PackedStringArray("objetivo")]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1244693703]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
 script = ExtResource("2_fw4w5")
-objetivo = NodePath("")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
 
