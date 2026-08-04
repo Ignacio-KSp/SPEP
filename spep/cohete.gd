@@ -33,27 +33,22 @@ var oxidante: float
 # CONTROL Y SAS
 # ======================
 @export_group("Control")
-@export var potencia_rotacion: float = 25.0
-@export var potencia_sas: float = 30.0
+@export var potencia_rotacion: float = 60.0
+@export var potencia_sas: float = 45.0
 @export var throttle_speed: float = 1.5
 
 var throttle: float = 0.0
 var motor_encendido: bool = false
 var sas_activado: bool = false
 
-# Para detectar solo el momento de pulsar una tecla
 var _teclas_anteriores = {}
 
 # ======================
-# FÍSICA
+# FÍSICA DEL VEHÍCULO
 # ======================
-@export_group("Física")
+@export_group("Física del Vehículo")
 @export var area_frontal: float = 1.8
 @export var coeficiente_drag: float = 0.4
-@export var altura_atmosfera: float = 5500.0
-@export var scale_height: float = 700.0
-@export var usar_gravedad_custom: bool = true
-@export var factor_gravedad: float = 0.25
 
 func _ready() -> void:
 	combustible = combustible_max
@@ -64,22 +59,27 @@ func _ready() -> void:
 	sleeping = false
 	gravity_scale = 0.0
 	
+	angular_damp = 0.4
+	linear_damp = 0.05
+	
 	motor_encendido = false
 	throttle = 0.0
 	sas_activado = false
 	
 	print("=== Cohete listo ===")
+	if not planeta:
+		push_warning("No se encontró el planeta")
+	if not thrust_point:
+		push_warning("No se asignó Thrust Point")
 
 func _physics_process(delta: float) -> void:
 	_manejar_input(delta)
 	_actualizar_masa()
 	
-	if usar_gravedad_custom and planeta:
+	if planeta:
 		aplicar_gravedad()
+		aplicar_drag()
 	
-	aplicar_drag()
-	
-	# Solo impulsa si el motor está ENCENDIDO
 	if motor_encendido and throttle > 0.01:
 		aplicar_empuje(delta)
 	
@@ -88,30 +88,21 @@ func _physics_process(delta: float) -> void:
 	if sas_activado:
 		aplicar_sas()
 
-# ======================
-# DETECCIÓN DE TECLA (solo un click)
-# ======================
 func _just_pressed(key: Key) -> bool:
-	var esta_presionada = Input.is_physical_key_pressed(key)
-	var estaba_presionada = _teclas_anteriores.get(key, false)
-	_teclas_anteriores[key] = esta_presionada
-	return esta_presionada and not estaba_presionada
+	var esta = Input.is_physical_key_pressed(key)
+	var estaba = _teclas_anteriores.get(key, false)
+	_teclas_anteriores[key] = esta
+	return esta and not estaba
 
-# ======================
-# INPUT
-# ======================
 func _manejar_input(delta: float) -> void:
-	# Motor ON/OFF con Space (solo un click)
 	if _just_pressed(KEY_SPACE):
 		motor_encendido = not motor_encendido
 		print("Motor: ", "ENCENDIDO" if motor_encendido else "APAGADO")
 	
-	# SAS ON/OFF con T (solo un click)
 	if _just_pressed(KEY_T):
 		sas_activado = not sas_activado
 		print("SAS: ", "ON" if sas_activado else "OFF")
 	
-	# Throttle solo funciona si el motor está encendido
 	if motor_encendido:
 		if Input.is_key_pressed(KEY_SHIFT):
 			throttle = clampf(throttle + throttle_speed * delta, 0.0, 1.0)
@@ -125,52 +116,44 @@ func _manejar_input(delta: float) -> void:
 	else:
 		throttle = 0.0
 
-# ======================
-# ROTACIÓN estilo KSP (W A S D Q E)
-# ======================
 func aplicar_control_rotacion() -> void:
-	var torque_local = Vector3.ZERO
+	var torque_local := Vector3.ZERO
 	
-	# W / S → Pitch
 	if Input.is_key_pressed(KEY_W):
-		torque_local.x += potencia_rotacion
+		torque_local.x += 1.0
 	if Input.is_key_pressed(KEY_S):
-		torque_local.x -= potencia_rotacion
+		torque_local.x -= 1.0
 	
-	# A / D → Yaw
 	if Input.is_key_pressed(KEY_A):
-		torque_local.y += potencia_rotacion
+		torque_local.y += 1.0
 	if Input.is_key_pressed(KEY_D):
-		torque_local.y -= potencia_rotacion
+		torque_local.y -= 1.0
 	
-	# Q / E → Roll
 	if Input.is_key_pressed(KEY_Q):
-		torque_local.z += potencia_rotacion
+		torque_local.z += 1.0
 	if Input.is_key_pressed(KEY_E):
-		torque_local.z -= potencia_rotacion
+		torque_local.z -= 1.0
 	
 	if torque_local != Vector3.ZERO:
-		# Convertimos el torque local a global y lo aplicamos
-		var torque_global = global_transform.basis * torque_local
-		apply_torque(torque_global * mass)  # Multiplicamos por masa para que se note
+		var torque = global_transform.basis * (torque_local * potencia_rotacion)
+		apply_torque(torque)
+
 func aplicar_sas() -> void:
 	var av = angular_velocity
-	if av.length() > 0.02:
-		apply_torque(-av * potencia_sas * mass)
+	if av.length_squared() > 0.0005:
+		apply_torque(-av * potencia_sas)
 
-# ======================
-# EMPUJE
-# ======================
 func aplicar_empuje(delta: float) -> void:
 	if combustible <= 0.0 or oxidante <= 0.0:
 		motor_encendido = false
 		throttle = 0.0
 		return
 	
-	var altitud = get_altitud()
-	var densidad = get_densidad_atmosfera(altitud)
-	var isp = lerpf(isp_atmosfera, isp_vacio, 1.0 - densidad)
+	var densidad = 0.0
+	if planeta:
+		densidad = planeta.get_densidad_atmosfera(global_position)
 	
+	var isp = lerpf(isp_atmosfera, isp_vacio, 1.0 - densidad)
 	var empuje_actual = empuje_max * throttle
 	
 	var g0 = 9.81
@@ -196,29 +179,17 @@ func aplicar_empuje(delta: float) -> void:
 	
 	apply_central_force(direccion * empuje_actual)
 
-# ======================
-# GRAVEDAD Y DRAG
-# ======================
 func aplicar_gravedad() -> void:
 	if not planeta:
 		return
-	
-	var direccion = planeta.global_position - global_position
-	var distancia = direccion.length()
-	if distancia < 5.0:
-		return
-	
-	direccion = direccion.normalized()
-	
-	var masa_planeta = 9800000.0
-	if planeta.has_method("get_masa"):
-		masa_planeta = planeta.get_masa()
-	
-	var fuerza = (masa_planeta * mass) / (distancia * distancia) * factor_gravedad
-	apply_central_force(direccion * fuerza)
+	var fuerza = planeta.get_gravedad_en(global_position, mass)
+	apply_central_force(fuerza)
 
 func aplicar_drag() -> void:
-	var densidad = get_densidad_atmosfera(get_altitud())
+	if not planeta:
+		return
+	
+	var densidad = planeta.get_densidad_atmosfera(global_position)
 	if densidad <= 0.001:
 		return
 	
@@ -235,19 +206,7 @@ func _actualizar_masa() -> void:
 func get_altitud() -> float:
 	if not planeta:
 		return 0.0
-	return global_position.distance_to(planeta.global_position) - get_radio_planeta()
-
-func get_radio_planeta() -> float:
-	if planeta and planeta.has_method("get_radio"):
-		return planeta.get_radio()
-	return 1000.0
-
-func get_densidad_atmosfera(altitud: float) -> float:
-	if altitud >= altura_atmosfera:
-		return 0.0
-	if altitud < 0.0:
-		return 1.0
-	return exp(-altitud / scale_height)
+	return planeta.get_altitud(global_position)
 
 # ======================
 # API PARA EL HUD

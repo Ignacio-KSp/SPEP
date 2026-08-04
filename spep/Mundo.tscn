@@ -13,29 +13,20 @@ radius = 999.0
 radius = 1000.0
 height = 2000.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_13efm"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aou4a"]
 transparency = 1
 cull_mode = 2
-albedo_color = Color(0.09803922, 0.21568628, 0.39215687, 0.07058824)
+albedo_color = Color(0.5647059, 0.70980394, 0.94509804, 0.13333334)
 emission_enabled = true
-emission = Color(0.20684138, 0.656592, 0.7942708, 1)
-emission_energy_multiplier = 0.6
+emission = Color(0.22745098, 0.4627451, 0.60784316, 1)
+emission_energy_multiplier = 0.5
 rim_enabled = true
-rim = 0.4
-rim_tint = 0.6
 
 [sub_resource type="SphereMesh" id="SphereMesh_2hh7m"]
 lightmap_size_hint = Vector2i(34559, 16495)
-material = SubResource("StandardMaterial3D_13efm")
-radius = 1500.0
-height = 2500.0
-
-[sub_resource type="BoxMesh" id="BoxMesh_t8jxu"]
-size = Vector3(2.307129, 1.2755127, 2.036255)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_pfhxm"]
-margin = 0.0
-size = Vector3(1.8689518, 1.4147453, 2.0245361)
+material = SubResource("StandardMaterial3D_aou4a")
+radius = 1600.0
+height = 3000.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pij3u"]
 
@@ -68,34 +59,25 @@ outer_radius = 0.5
 script = ExtResource("1_otwa2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta" unique_id=2009365636]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -212.8049, -400.76047, -59.48401)
 shape = SubResource("SphereShape3D_aou4a")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Planeta" unique_id=442627015]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -207.4505, -393.4346, -60.614044)
 mesh = SubResource("SphereMesh_5ckkb")
 
 [node name="Atmosfera" type="MeshInstance3D" parent="Planeta" unique_id=1955665039]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -227.1576, -375.99042, -75.55469)
+rotation_order = 0
 mesh = SubResource("SphereMesh_2hh7m")
 script = ExtResource("2_aou4a")
 
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="Planeta" unique_id=121109526]
-transform = Transform3D(0.9999709, -0.007629532, 0, 0.007629532, 0.9999709, 0, 0, 0, 1, -121.524216, 600.29535, 0.0090869665)
-mesh = SubResource("BoxMesh_t8jxu")
-
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="Planeta" unique_id=756619684]
-transform = Transform3D(0.99997264, 0.0073992657, 4.5322568e-06, -0.0073992657, 0.99997187, 0.0012246673, 4.5322568e-06, -0.0012246673, 0.9999992, -121.74164, 600.2167, 0.0068969056)
-shape = SubResource("BoxShape3D_pfhxm")
-
 [node name="Cohete" type="RigidBody3D" parent="." unique_id=468476956 node_paths=PackedStringArray("thrust_point")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -121.48327, 602.57117, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1003.35156, 0)
 physics_material_override = SubResource("PhysicsMaterial_pij3u")
 can_sleep = false
 linear_damp = 0.1
+angular_damp = 0.4
 script = ExtResource("1_lgngo")
 thrust_point = NodePath("Motor/Marker3D")
-potencia_rotacion = 40.0
+potencia_rotacion = 80.0
 
 [node name="Combustible" type="MeshInstance3D" parent="Cohete" unique_id=1913945744]
 mesh = SubResource("CylinderMesh_0oi55")
@@ -131,15 +113,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3681641, 0)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1224654292]
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1244693703]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1244693703 node_paths=PackedStringArray("objetivo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
 script = ExtResource("2_fw4w5")
+objetivo = NodePath("../Cohete")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
 
 [node name="HUD" type="Control" parent="CanvasLayer" unique_id=586649092]
 layout_mode = 3
-anchors_preset = 0
+anchor_right = 0.012152778
+anchor_bottom = -0.0046296297
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("5_aou4a")
