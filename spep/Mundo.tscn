@@ -1,13 +1,15 @@
 [gd_scene format=3 uid="uid://djl3yycy5dsdx"]
 
-[ext_resource type="Script" uid="uid://dxdhjh1s826gp" path="res://cohete.gd" id="1_lgngo"]
-[ext_resource type="Script" uid="uid://b8400q654d3ih" path="res://planeta.gd" id="1_otwa2"]
+[ext_resource type="Script" uid="uid://dlujv134wg2cr" path="res://Planeta.cs" id="1_5ckkb"]
 [ext_resource type="Script" uid="uid://soxyh1qu4hrc" path="res://Admosfera.gd" id="2_aou4a"]
 [ext_resource type="Script" uid="uid://draumge2n2xss" path="res://camera_seguimiento.gd" id="2_fw4w5"]
-[ext_resource type="Script" uid="uid://crf7of38rwqkq" path="res://hud.gd" id="5_aou4a"]
+[ext_resource type="Script" uid="uid://cinf4ik3nu8le" path="res://Cohete.cs" id="3_5ckkb"]
+[ext_resource type="Script" uid="uid://bteyrn64dygu5" path="res://HUD.cs" id="5_5ckkb"]
+[ext_resource type="Script" uid="uid://b4ecuqs4llasu" path="res://mapa_orbital.gd" id="6_5ckkb"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aou4a"]
-radius = 999.0
+margin = 0.004
+radius = 999.9
 
 [sub_resource type="SphereMesh" id="SphereMesh_5ckkb"]
 radius = 1000.0
@@ -16,7 +18,7 @@ height = 2000.0
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aou4a"]
 transparency = 1
 cull_mode = 2
-albedo_color = Color(0.5647059, 0.70980394, 0.94509804, 0.13333334)
+albedo_color = Color(0.5647059, 0.70980394, 0.94509804, 0.007843138)
 emission_enabled = true
 emission = Color(0.22745098, 0.4627451, 0.60784316, 1)
 emission_energy_multiplier = 0.5
@@ -25,15 +27,18 @@ rim_enabled = true
 [sub_resource type="SphereMesh" id="SphereMesh_2hh7m"]
 lightmap_size_hint = Vector2i(34559, 16495)
 material = SubResource("StandardMaterial3D_aou4a")
-radius = 1600.0
-height = 3000.0
+radius = 1150.0
+height = 2300.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ws11t"]
+size = Vector3(1, 1.1043701, 1)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pij3u"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_0oi55"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_57gmc"]
-height = 3.324463
+height = 3.272583
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_0crsg"]
 top_radius = 0.0
@@ -56,7 +61,8 @@ outer_radius = 0.5
 [node name="mundo" type="Node3D" unique_id=1299125237]
 
 [node name="Planeta" type="StaticBody3D" parent="." unique_id=88448087]
-script = ExtResource("1_otwa2")
+script = ExtResource("1_5ckkb")
+FactorGravedad = 0.18
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta" unique_id=2009365636]
 shape = SubResource("SphereShape3D_aou4a")
@@ -69,28 +75,37 @@ rotation_order = 0
 mesh = SubResource("SphereMesh_2hh7m")
 script = ExtResource("2_aou4a")
 
-[node name="Cohete" type="RigidBody3D" parent="." unique_id=468476956 node_paths=PackedStringArray("thrust_point")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1003.35156, 0)
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="Planeta" unique_id=1207578434]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09281242, 0.20692354, 999.6661)
+shape = SubResource("BoxShape3D_ws11t")
+
+[node name="Cohete" type="RigidBody3D" parent="." unique_id=468476956 node_paths=PackedStringArray("ThrustPoint")]
+transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 0.3937307, 1000.36273)
 physics_material_override = SubResource("PhysicsMaterial_pij3u")
 can_sleep = false
 linear_damp = 0.1
 angular_damp = 0.4
-script = ExtResource("1_lgngo")
-thrust_point = NodePath("Motor/Marker3D")
-potencia_rotacion = 80.0
+script = ExtResource("3_5ckkb")
+ThrustPoint = NodePath("Motor/Marker3D")
+CombustibleMax = 700.0
+OxidanteMax = 700.0
+MasaSeca = 2.0
+EmpujeMax = 50000.0
 
 [node name="Combustible" type="MeshInstance3D" parent="Cohete" unique_id=1913945744]
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0, 0)
 mesh = SubResource("CylinderMesh_0oi55")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Cohete" unique_id=1199437100]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06640625, 0)
+transform = Transform3D(0.08, 0, 0, 0, 0.079999864, 0, 0, 0, 0.079999864, 0, 0.0048828125, 0)
 shape = SubResource("CylinderShape3D_57gmc")
 
 [node name="Cabina" type="MeshInstance3D" parent="Cohete" unique_id=1470653137]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4851074, 0)
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0.1184082, 0)
 mesh = SubResource("CylinderMesh_0crsg")
 
 [node name="Motor" type="Node3D" parent="Cohete" unique_id=1724604617]
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Cohete/Motor" unique_id=557263977]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0093688965, -1.2926025, 0)
@@ -117,16 +132,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3681641, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
 script = ExtResource("2_fw4w5")
 objetivo = NodePath("../Cohete")
+velocidad_zoom = 1.0
+distancia_min = 1.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
 
 [node name="HUD" type="Control" parent="CanvasLayer" unique_id=586649092]
 layout_mode = 3
+anchor_top = -0.0046296297
 anchor_right = 0.012152778
 anchor_bottom = -0.0046296297
 offset_right = 40.0
 offset_bottom = 40.0
-script = ExtResource("5_aou4a")
+script = ExtResource("5_5ckkb")
 metadata/_edit_use_anchors_ = true
 
 [node name="Altitud" type="Label" parent="CanvasLayer/HUD" unique_id=871539434]
@@ -170,3 +188,6 @@ offset_left = 36.0
 offset_top = 100.0
 offset_right = 76.0
 offset_bottom = 123.0
+
+[node name="MapaOrbital" type="Node3D" parent="." unique_id=815434377]
+script = ExtResource("6_5ckkb")

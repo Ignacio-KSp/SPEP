@@ -3,18 +3,18 @@ class_name Planeta
 
 @export_group("Propiedades del Planeta")
 @export var radio: float = 1000.0
-@export var masa: float = 9800000.0
+@export var masa: float = 15000000.0          # Masa un poco más alta
 
 @export_group("Atmósfera")
-@export var altura_atmosfera: float = 5500.0
-@export var scale_height: float = 700.0
-@export var densidad_superficie: float = 1.0
+@export var altura_atmosfera: float = 150.0   # Atmósfera hasta 150 unidades
+@export var scale_height: float = 30.0        # Densidad baja de forma realista
+@export var densidad_superficie: float = 1.2
 
 @export_group("Gravedad")
-@export var factor_gravedad: float = 0.22
+@export var factor_gravedad: float = 0.28     # Valor clave para poder orbitar
 
 # ======================
-# API pública (la usan los vehículos)
+# API pública
 # ======================
 
 func get_radio() -> float:
