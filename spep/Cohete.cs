@@ -7,7 +7,7 @@ public partial class Cohete : RigidBody3D
 	// REFERENCIAS
 	// ======================
 	[Export] public NodePath PlanetaPath { get; set; } = new NodePath("../Planeta");
-	private Node3D planeta;
+	private Planeta planeta;
 
 	[Export] public Node3D ThrustPoint { get; set; }
 
@@ -30,6 +30,9 @@ public partial class Cohete : RigidBody3D
 	[Export] public float IspVacio { get; set; } = 320.0f;
 	[Export] public float IspAtmosfera { get; set; } = 260.0f;
 	[Export] public float RatioOxidante { get; set; } = 1.2f;
+	// Multiplicador de empuje: escala EmpujeMax a las unidades del mundo de Godot.
+	// Antes era un "15.0f" fijo escondido en el código; ahora es ajustable desde el Inspector.
+	[Export] public float EscalaEmpuje { get; set; } = 15.0f;
 
 	// ======================
 	// CONTROL Y SAS
@@ -61,9 +64,9 @@ public partial class Cohete : RigidBody3D
 		CanSleep = false;
 		Sleeping = false;
 		GravityScale = 0.0f;
-		
+
 		// Activar Detección Continua de Colisiones para máxima precisión con Jolt
-		ContinuousCd = true; 
+		ContinuousCd = true;
 
 		AngularDamp = 0.4f;
 		LinearDamp = 0.05f;
@@ -72,11 +75,11 @@ public partial class Cohete : RigidBody3D
 		throttle = 0.0f;
 		sasActivado = false;
 
-		planeta = GetNodeOrNull<Node3D>(PlanetaPath);
+		planeta = GetNodeOrNull<Planeta>(PlanetaPath);
 
 		GD.Print("=== Cohete listo (C#) ===");
 		if (planeta == null)
-			GD.PushWarning("No se encontró el planeta");
+			GD.PushWarning("No se encontró el planeta (o el nodo no tiene el script Planeta.cs)");
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -88,7 +91,7 @@ public partial class Cohete : RigidBody3D
 
 		if (planeta != null)
 		{
-			AplicarGravedadEquilibrada();
+			AplicarGravedad();
 			AplicarDrag();
 		}
 
@@ -175,14 +178,12 @@ public partial class Cohete : RigidBody3D
 			return;
 		}
 
-		float densidad = 0.0f;
-		if (planeta != null && planeta.HasMethod("GetDensidadAtmosfera"))
-			densidad = (float)planeta.Call("GetDensidadAtmosfera", GlobalPosition);
-		
+		float densidad = planeta != null ? planeta.GetDensidadAtmosfera(GlobalPosition) : 0.0f;
+
 		float isp = Mathf.Lerp(IspAtmosfera, IspVacio, 1.0f - densidad);
-		
+
 		// Factor de escala aplicado para adaptarlo a las unidades del mundo de Godot
-		float empujeActual = EmpujeMax * throttle * 15.0f; 
+		float empujeActual = EmpujeMax * throttle * EscalaEmpuje;
 
 		float g0 = 9.81f;
 		float consumoTotal = (EmpujeMax * throttle / (isp * g0)) * delta * 0.1f;
@@ -201,23 +202,28 @@ public partial class Cohete : RigidBody3D
 		combustible -= consumoComb;
 		oxidante -= consumoOxi;
 
-		// Dirección opuesta al centro del planeta (hacia arriba)
-		Vector3 direccionHaciaArriba = (GlobalPosition - planeta.GlobalPosition).Normalized();
+		// CLAVE: el empuje se aplica en la dirección en la que apunta la nave
+		// (su eje local +Y, hacia la "nariz"/cabina), NO hacia afuera del planeta.
+		// Así, cuando rotás el cohete con WASD/QE, el empuje también gira con él
+		// y podés inclinar la trayectoria para "hacer la gravedad" (gravity turn).
+		Vector3 direccionEmpuje = GlobalTransform.Basis.Y.Normalized();
 
-		ApplyCentralForce(direccionHaciaArriba * empujeActual);
+		ApplyCentralForce(direccionEmpuje * empujeActual);
 	}
 
-	private void AplicarGravedadEquilibrada()
+	private void AplicarGravedad()
 	{
-		Vector3 direccionHaciaCentro = (planeta.GlobalPosition - GlobalPosition).Normalized();
-		ApplyCentralForce(direccionHaciaCentro * (9.81f * Mass));
+		// Gravedad newtoniana real (F = G*M*m/r^2), igual a la que usa el mapa
+		// orbital para predecir la trayectoria. Antes acá había una gravedad
+		// constante de 9.81 m/s² sin importar la altura, que no coincidía con
+		// la línea verde del mapa orbital y no permitía órbitas reales.
+		Vector3 fuerzaGravedad = planeta.GetGravedadEn(GlobalPosition, Mass);
+		ApplyCentralForce(fuerzaGravedad);
 	}
 
 	private void AplicarDrag()
 	{
-		if (planeta == null || !planeta.HasMethod("GetDensidadAtmosfera")) return;
-
-		float densidad = (float)planeta.Call("GetDensidadAtmosfera", GlobalPosition);
+		float densidad = planeta.GetDensidadAtmosfera(GlobalPosition);
 		if (densidad <= 0.001f) return;
 
 		Vector3 velocidad = LinearVelocity;
@@ -235,8 +241,7 @@ public partial class Cohete : RigidBody3D
 	public float GetAltitud()
 	{
 		if (planeta == null) return 0.0f;
-		float distancia = planeta.GlobalPosition.DistanceTo(GlobalPosition);
-		return distancia - 500.0f; 
+		return planeta.GetAltitud(GlobalPosition);
 	}
 
 	public float GetThrottle() => throttle;

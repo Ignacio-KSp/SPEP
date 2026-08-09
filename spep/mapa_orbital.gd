@@ -137,21 +137,49 @@ func actualizar_trayectoria() -> void:
 	var pos = cohete.global_position
 	var vel = cohete.linear_velocity
 	
-	var masa_planeta = 15000000.0
-	var radio_p = 1000.0
+	var masa_planeta = 1.47e19
+	var radio_p = 10000.0
 	var constante_g = 0.00000000006674 # Constante G por defecto
 	
-	if planeta.has_method("get_masa"):
+	# Planeta.cs (C#) expone estas propiedades directamente como
+	# "MasaPlaneta" / "RadioPlaneta" / "G" (no como métodos get_masa()/get_radio(),
+	# esos no existen en el script C#), así que se leen por nombre de propiedad.
+	if "MasaPlaneta" in planeta:
+		masa_planeta = planeta.MasaPlaneta
+	elif planeta.has_method("get_masa"):
 		masa_planeta = planeta.get_masa()
-		
+	
+	if "RadioPlaneta" in planeta:
+		radio_p = planeta.RadioPlaneta
+	elif planeta.has_method("get_radio"):
+		radio_p = planeta.get_radio()
+	
 	# Buscamos 'G' o mantenemos retrocompatibilidad con 'factor_gravedad'
 	if "G" in planeta:
 		constante_g = planeta.G
 	elif "factor_gravedad" in planeta:
 		constante_g = planeta.factor_gravedad
-		
-	if planeta.has_method("get_radio"):
-		radio_p = planeta.get_radio()
+	
+	var gm = constante_g * masa_planeta
+	
+	# --- Paso de tiempo adaptativo (clave para que la elipse salga completa) ---
+	# Antes se usaba siempre el mismo dt_prediccion fijo, así que a mayor
+	# velocidad la órbita es más grande pero se simulaban los mismos "segundos"
+	# totales (puntos_trayectoria * dt_prediccion) -> la línea se veía cada vez
+	# más corta/recta en vez de completar la elipse.
+	# Ahora, si la órbita es cerrada (energía < 0), calculamos su período real
+	# con la fórmula vis-viva y repartimos los puntos a lo largo de todo ese
+	# período, así la elipse siempre se dibuja completa sin importar qué tan
+	# rápido vaya el cohete.
+	var paso = dt_prediccion
+	var dist0 = (planeta.global_position - pos).length()
+	if dist0 > 0.001 and gm > 0.0:
+		var energia = vel.length_squared() * 0.5 - gm / dist0
+		if energia < 0.0:
+			var semi_eje_mayor = -gm / (2.0 * energia)
+			if semi_eje_mayor > 0.0:
+				var periodo = TAU * sqrt(pow(semi_eje_mayor, 3.0) / gm)
+				paso = clampf(periodo / float(puntos_trayectoria), 0.02, 30.0)
 	
 	# Predicción más larga y estable
 	for i in range(puntos_trayectoria):
@@ -164,11 +192,11 @@ func actualizar_trayectoria() -> void:
 			break
 		
 		# Corrección 2: Gravedad Newtoniana sincronizada
-		var acc = dir.normalized() * ((constante_g * masa_planeta) / (dist * dist))
+		var acc = dir.normalized() * (gm / (dist * dist))
 		
 		# Integración un poco más estable
-		vel += acc * dt_prediccion
-		pos += vel * dt_prediccion
+		vel += acc * paso
+		pos += vel * paso
 	
 	if puntos.size() < 2:
 		var imm_vacia = linea.mesh as ImmediateMesh

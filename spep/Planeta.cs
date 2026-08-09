@@ -3,10 +3,20 @@ using Godot;
 public partial class Planeta : Node3D
 {
 	[ExportGroup("Propiedades Físicas")]
-	// Constante de Gravitación Universal (puedes subirla si quieres planetas pequeños pero pesados)
-	[Export] public float G { get; set; } = 6.674e-11f; 
-	[Export] public float MasaPlaneta { get; set; } = 5.972e24f; // Masa en kg (ejemplo: Tierra)
-	[Export] public float RadioPlaneta { get; set; } = 600000.0f; // Radio en metros (ej. 600 km escala KSP)
+	// Constante de Gravitación Universal real. No la toques para "ajustar" la gravedad:
+	// usa MasaPlaneta, que es la variable pensada para eso.
+	[Export] public float G { get; set; } = 6.674e-11f;
+
+	// IMPORTANTE: MasaPlaneta y RadioPlaneta están acoplados a través de la fórmula
+	// g = G * MasaPlaneta / RadioPlaneta^2 (gravedad en la superficie).
+	// Los valores de abajo (radio 10 km) dan g ≈ 9.81 m/s², similar a Kerbin.
+	// Si cambiás RadioPlaneta, recalculá MasaPlaneta con:
+	//     MasaPlaneta = g_deseada * RadioPlaneta^2 / G
+	// Ejemplos ya calculados para g = 9.81 m/s²:
+	//   Radio 10.000 m (10 km)  -> MasaPlaneta ≈ 1.47e19 kg
+	//   Radio 600.000 m (600 km, Kerbin real) -> MasaPlaneta ≈ 5.29e22 kg
+	[Export] public float MasaPlaneta { get; set; } = 1.47e19f; // kg
+	[Export] public float RadioPlaneta { get; set; } = 10000.0f; // metros (10 km)
 
 	[ExportGroup("Atmósfera")]
 	[Export] public float AlturaAtmosfera { get; set; } = 70000.0f; // 70 km de atmósfera

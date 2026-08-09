@@ -9,11 +9,11 @@
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aou4a"]
 margin = 0.0
-radius = 999.4
+radius = 9994.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_5ckkb"]
-radius = 1000.0
-height = 2000.0
+radius = 10000.0
+height = 20000.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aou4a"]
 transparency = 1
@@ -27,8 +27,8 @@ rim_enabled = true
 [sub_resource type="SphereMesh" id="SphereMesh_2hh7m"]
 lightmap_size_hint = Vector2i(34559, 16495)
 material = SubResource("StandardMaterial3D_aou4a")
-radius = 1150.0
-height = 2300.0
+radius = 80000.0
+height = 160000.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ws11t"]
 
@@ -81,7 +81,7 @@ mesh = SubResource("SphereMesh_2hh7m")
 script = ExtResource("2_aou4a")
 
 [node name="Base" type="StaticBody3D" parent="Planeta" unique_id=2035427737]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47380602, 1000.0161)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.73806, 10000.161)
 physics_material_override = SubResource("PhysicsMaterial_ws11t")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta/Base" unique_id=1630295610]
@@ -92,7 +92,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.015991211)
 mesh = SubResource("BoxMesh_ws11t")
 
 [node name="Cohete" type="RigidBody3D" parent="." unique_id=468476956 node_paths=PackedStringArray("ThrustPoint")]
-transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 0.38429418, 1000.6509)
+transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 4.6044173, 10000.824)
 physics_material_override = SubResource("PhysicsMaterial_pij3u")
 can_sleep = false
 linear_damp = 0.1
@@ -200,3 +200,4 @@ offset_bottom = 123.0
 
 [node name="MapaOrbital" type="Node3D" parent="." unique_id=815434377]
 script = ExtResource("6_5ckkb")
+altura_inicial_mapa = 10000.0
