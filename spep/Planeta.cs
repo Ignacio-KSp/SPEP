@@ -1,62 +1,55 @@
 using Godot;
 
-public partial class Planeta : StaticBody3D
+public partial class Planeta : Node3D
 {
-	[ExportGroup("Propiedades del Planeta")]
-	[Export] public float Radio { get; set; } = 1000.0f;
-	[Export] public float Masa { get; set; } = 9800000.0f;
+	[ExportGroup("Propiedades Físicas")]
+	// Constante de Gravitación Universal (puedes subirla si quieres planetas pequeños pero pesados)
+	[Export] public float G { get; set; } = 6.674e-11f; 
+	[Export] public float MasaPlaneta { get; set; } = 5.972e24f; // Masa en kg (ejemplo: Tierra)
+	[Export] public float RadioPlaneta { get; set; } = 600000.0f; // Radio en metros (ej. 600 km escala KSP)
 
 	[ExportGroup("Atmósfera")]
-	[Export] public float AlturaAtmosfera { get; set; } = 5500.0f;
-	[Export] public float ScaleHeight { get; set; } = 700.0f;
-	[Export] public float DensidadSuperficie { get; set; } = 1.0f;
+	[Export] public float AlturaAtmosfera { get; set; } = 70000.0f; // 70 km de atmósfera
+	[Export] public float DensidadSuperficie { get; set; } = 1.225f; // kg/m³ a nivel del mar
+	[Export] public float EscalaAltura { get; set; } = 5000.0f; // Controla qué tan rápido "cae" la densidad
 
-	[ExportGroup("Gravedad")]
-	[Export] public float FactorGravedad { get; set; } = 0.22f;
-
-	// ======================
-	// API pública
-	// ======================
-
-	public float GetRadio()
+	// ==========================================
+	// 1. CÁLCULO DE ALTITUD
+	// ==========================================
+	public float GetAltitud(Vector3 posicionObjeto)
 	{
-		return Radio;
+		float distanciaAlCentro = GlobalPosition.DistanceTo(posicionObjeto);
+		return distanciaAlCentro - RadioPlaneta;
 	}
 
-	public float GetMasa()
+	// ==========================================
+	// 2. GRAVEDAD REALISTA (Ley de Newton)
+	// ==========================================
+	public Vector3 GetGravedadEn(Vector3 posicionObjeto, float masaObjeto)
 	{
-		return Masa;
+		Vector3 direccionHaciaCentro = (GlobalPosition - posicionObjeto).Normalized();
+		float distancia = GlobalPosition.DistanceTo(posicionObjeto);
+
+		if (distancia <= 0.001f) return Vector3.Zero;
+
+		// Magnitud de la fuerza: F = G * (M1 * M2) / r^2
+		float fuerzaMagnitud = (G * MasaPlaneta * masaObjeto) / (distancia * distancia);
+
+		return direccionHaciaCentro * fuerzaMagnitud;
 	}
 
-	public float GetAltitud(Vector3 posicionGlobal)
+	// ==========================================
+	// 3. DENSIDAD DE LA ATMÓSFERA (Exponencial)
+	// ==========================================
+	public float GetDensidadAtmosfera(Vector3 posicionObjeto)
 	{
-		return posicionGlobal.DistanceTo(GlobalPosition) - Radio;
-	}
+		float altitud = GetAltitud(posicionObjeto);
 
-	public float GetDensidadAtmosfera(Vector3 posicionGlobal)
-	{
-		float altitud = GetAltitud(posicionGlobal);
-
-		if (altitud >= AlturaAtmosfera)
+		// Si estamos fuera de la atmósfera, la densidad es 0
+		if (altitud >= AlturaAtmosfera || altitud < 0)
 			return 0.0f;
 
-		if (altitud < 0.0f)
-			return DensidadSuperficie;
-
-		return DensidadSuperficie * Mathf.Exp(-altitud / ScaleHeight);
-	}
-
-	public Vector3 GetGravedadEn(Vector3 posicionGlobal, float masaObjeto)
-	{
-		Vector3 direccion = GlobalPosition - posicionGlobal;
-		float distancia = direccion.Length();
-
-		if (distancia < 1.0f)
-			return Vector3.Zero;
-
-		direccion = direccion.Normalized();
-
-		float fuerza = (Masa * masaObjeto) / (distancia * distancia) * FactorGravedad;
-		return direccion * fuerza;
+		// Fórmula de densidad barométrica: p = p0 * e^(-altitud / escala)
+		return DensidadSuperficie * Mathf.Exp(-altitud / EscalaAltura);
 	}
 }

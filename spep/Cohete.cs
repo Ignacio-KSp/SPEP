@@ -7,7 +7,7 @@ public partial class Cohete : RigidBody3D
 	// REFERENCIAS
 	// ======================
 	[Export] public NodePath PlanetaPath { get; set; } = new NodePath("../Planeta");
-	private Planeta planeta;
+	private Node3D planeta;
 
 	[Export] public Node3D ThrustPoint { get; set; }
 
@@ -15,9 +15,9 @@ public partial class Cohete : RigidBody3D
 	// TANQUE
 	// ======================
 	[ExportGroup("Tanque")]
-	[Export] public float CombustibleMax { get; set; } = 500.0f;
-	[Export] public float OxidanteMax { get; set; } = 500.0f;
-	[Export] public float MasaSeca { get; set; } = 2.5f;
+	[Export] public float CombustibleMax { get; set; } = 700.0f;
+	[Export] public float OxidanteMax { get; set; } = 700.0f;
+	[Export] public float MasaSeca { get; set; } = 2.0f;
 
 	private float combustible;
 	private float oxidante;
@@ -26,7 +26,7 @@ public partial class Cohete : RigidBody3D
 	// MOTOR
 	// ======================
 	[ExportGroup("Motor")]
-	[Export] public float EmpujeMax { get; set; } = 18000.0f;
+	[Export] public float EmpujeMax { get; set; } = 50000.0f;
 	[Export] public float IspVacio { get; set; } = 320.0f;
 	[Export] public float IspAtmosfera { get; set; } = 260.0f;
 	[Export] public float RatioOxidante { get; set; } = 1.2f;
@@ -61,6 +61,9 @@ public partial class Cohete : RigidBody3D
 		CanSleep = false;
 		Sleeping = false;
 		GravityScale = 0.0f;
+		
+		// Activar Detección Continua de Colisiones para máxima precisión con Jolt
+		ContinuousCd = true; 
 
 		AngularDamp = 0.4f;
 		LinearDamp = 0.05f;
@@ -69,13 +72,11 @@ public partial class Cohete : RigidBody3D
 		throttle = 0.0f;
 		sasActivado = false;
 
-		planeta = GetNodeOrNull<Planeta>(PlanetaPath);
+		planeta = GetNodeOrNull<Node3D>(PlanetaPath);
 
 		GD.Print("=== Cohete listo (C#) ===");
 		if (planeta == null)
 			GD.PushWarning("No se encontró el planeta");
-		if (ThrustPoint == null)
-			GD.PushWarning("No se asignó Thrust Point");
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -87,7 +88,7 @@ public partial class Cohete : RigidBody3D
 
 		if (planeta != null)
 		{
-			AplicarGravedad();
+			AplicarGravedadEquilibrada();
 			AplicarDrag();
 		}
 
@@ -144,20 +145,12 @@ public partial class Cohete : RigidBody3D
 	{
 		Vector3 torqueLocal = Vector3.Zero;
 
-		if (Input.IsKeyPressed(Key.W))
-			torqueLocal.X += 1.0f;
-		if (Input.IsKeyPressed(Key.S))
-			torqueLocal.X -= 1.0f;
-
-		if (Input.IsKeyPressed(Key.A))
-			torqueLocal.Y += 1.0f;
-		if (Input.IsKeyPressed(Key.D))
-			torqueLocal.Y -= 1.0f;
-
-		if (Input.IsKeyPressed(Key.Q))
-			torqueLocal.Z += 1.0f;
-		if (Input.IsKeyPressed(Key.E))
-			torqueLocal.Z -= 1.0f;
+		if (Input.IsKeyPressed(Key.W)) torqueLocal.X += 1.0f;
+		if (Input.IsKeyPressed(Key.S)) torqueLocal.X -= 1.0f;
+		if (Input.IsKeyPressed(Key.A)) torqueLocal.Y += 1.0f;
+		if (Input.IsKeyPressed(Key.D)) torqueLocal.Y -= 1.0f;
+		if (Input.IsKeyPressed(Key.Q)) torqueLocal.Z += 1.0f;
+		if (Input.IsKeyPressed(Key.E)) torqueLocal.Z -= 1.0f;
 
 		if (torqueLocal != Vector3.Zero)
 		{
@@ -182,12 +175,17 @@ public partial class Cohete : RigidBody3D
 			return;
 		}
 
-		float densidad = planeta != null ? planeta.GetDensidadAtmosfera(GlobalPosition) : 0.0f;
+		float densidad = 0.0f;
+		if (planeta != null && planeta.HasMethod("GetDensidadAtmosfera"))
+			densidad = (float)planeta.Call("GetDensidadAtmosfera", GlobalPosition);
+		
 		float isp = Mathf.Lerp(IspAtmosfera, IspVacio, 1.0f - densidad);
-		float empujeActual = EmpujeMax * throttle;
+		
+		// Factor de escala aplicado para adaptarlo a las unidades del mundo de Godot
+		float empujeActual = EmpujeMax * throttle * 15.0f; 
 
 		float g0 = 9.81f;
-		float consumoTotal = (empujeActual / (isp * g0)) * delta;
+		float consumoTotal = (EmpujeMax * throttle / (isp * g0)) * delta * 0.1f;
 		float consumoComb = consumoTotal / (1.0f + RatioOxidante);
 		float consumoOxi = consumoTotal - consumoComb;
 
@@ -203,27 +201,23 @@ public partial class Cohete : RigidBody3D
 		combustible -= consumoComb;
 		oxidante -= consumoOxi;
 
-		Vector3 direccion;
-		if (ThrustPoint != null && IsInstanceValid(ThrustPoint))
-			direccion = ThrustPoint.GlobalTransform.Basis.Y;
-		else
-			direccion = GlobalTransform.Basis.Y;
+		// Dirección opuesta al centro del planeta (hacia arriba)
+		Vector3 direccionHaciaArriba = (GlobalPosition - planeta.GlobalPosition).Normalized();
 
-		ApplyCentralForce(direccion * empujeActual);
+		ApplyCentralForce(direccionHaciaArriba * empujeActual);
 	}
 
-	private void AplicarGravedad()
+	private void AplicarGravedadEquilibrada()
 	{
-		if (planeta == null) return;
-		Vector3 fuerza = planeta.GetGravedadEn(GlobalPosition, Mass);
-		ApplyCentralForce(fuerza);
+		Vector3 direccionHaciaCentro = (planeta.GlobalPosition - GlobalPosition).Normalized();
+		ApplyCentralForce(direccionHaciaCentro * (9.81f * Mass));
 	}
 
 	private void AplicarDrag()
 	{
-		if (planeta == null) return;
+		if (planeta == null || !planeta.HasMethod("GetDensidadAtmosfera")) return;
 
-		float densidad = planeta.GetDensidadAtmosfera(GlobalPosition);
+		float densidad = (float)planeta.Call("GetDensidadAtmosfera", GlobalPosition);
 		if (densidad <= 0.001f) return;
 
 		Vector3 velocidad = LinearVelocity;
@@ -241,12 +235,10 @@ public partial class Cohete : RigidBody3D
 	public float GetAltitud()
 	{
 		if (planeta == null) return 0.0f;
-		return planeta.GetAltitud(GlobalPosition);
+		float distancia = planeta.GlobalPosition.DistanceTo(GlobalPosition);
+		return distancia - 500.0f; 
 	}
 
-	// ======================
-	// API PARA EL HUD
-	// ======================
 	public float GetThrottle() => throttle;
 	public float GetCombustiblePorcentaje() => CombustibleMax > 0 ? combustible / CombustibleMax : 0.0f;
 	public float GetOxidantePorcentaje() => OxidanteMax > 0 ? oxidante / OxidanteMax : 0.0f;

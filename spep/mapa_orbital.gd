@@ -35,6 +35,11 @@ func _ready() -> void:
 	mat.albedo_color = Color(0.1, 1.0, 0.4, 0.95)
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	linea.material_override = mat
+	
+	# Corrección 1: Crear el ImmediateMesh una sola vez para evitar pérdida de memoria
+	var imm = ImmediateMesh.new()
+	linea.mesh = imm
+	
 	linea.visible = false
 	
 	# === Marcador del cohete (punto) ===
@@ -48,7 +53,7 @@ func _ready() -> void:
 	
 	var mat_marcador = StandardMaterial3D.new()
 	mat_marcador.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat_marcador.albedo_color = Color(1.0, 0.3, 0.1)  # Naranja/rojo
+	mat_marcador.albedo_color = Color(1.0, 0.3, 0.1) # Naranja/rojo
 	marcador_cohete.material_override = mat_marcador
 	marcador_cohete.visible = false
 	
@@ -122,7 +127,10 @@ func actualizar_marcador() -> void:
 
 func actualizar_trayectoria() -> void:
 	if not cohete or not planeta:
-		linea.mesh = null
+		# En lugar de null, limpiamos la malla existente
+		var imm_vacia = linea.mesh as ImmediateMesh
+		if imm_vacia:
+			imm_vacia.clear_surfaces()
 		return
 	
 	var puntos: PackedVector3Array = []
@@ -130,13 +138,18 @@ func actualizar_trayectoria() -> void:
 	var vel = cohete.linear_velocity
 	
 	var masa_planeta = 15000000.0
-	var factor = 0.18
 	var radio_p = 1000.0
+	var constante_g = 0.00000000006674 # Constante G por defecto
 	
 	if planeta.has_method("get_masa"):
 		masa_planeta = planeta.get_masa()
-	if "factor_gravedad" in planeta:
-		factor = planeta.factor_gravedad
+		
+	# Buscamos 'G' o mantenemos retrocompatibilidad con 'factor_gravedad'
+	if "G" in planeta:
+		constante_g = planeta.G
+	elif "factor_gravedad" in planeta:
+		constante_g = planeta.factor_gravedad
+		
 	if planeta.has_method("get_radio"):
 		radio_p = planeta.get_radio()
 	
@@ -150,21 +163,24 @@ func actualizar_trayectoria() -> void:
 		if dist < radio_p + 2.0:
 			break
 		
-		var acc = dir.normalized() * ((masa_planeta * factor) / (dist * dist))
+		# Corrección 2: Gravedad Newtoniana sincronizada
+		var acc = dir.normalized() * ((constante_g * masa_planeta) / (dist * dist))
 		
 		# Integración un poco más estable
 		vel += acc * dt_prediccion
 		pos += vel * dt_prediccion
 	
 	if puntos.size() < 2:
-		linea.mesh = null
+		var imm_vacia = linea.mesh as ImmediateMesh
+		imm_vacia.clear_surfaces()
 		return
 	
-	var imm = ImmediateMesh.new()
+	# Corrección 1 (continuación): Reutilizar la malla existente
+	var imm = linea.mesh as ImmediateMesh
+	imm.clear_surfaces()
 	imm.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	
 	for p in puntos:
 		imm.surface_add_vertex(to_local(p))
 	
 	imm.surface_end()
-	linea.mesh = imm

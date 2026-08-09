@@ -28,7 +28,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and arrastrando:
 		rotacion_x -= event.relative.x * sensibilidad_raton
 		rotacion_y -= event.relative.y * sensibilidad_raton
-		rotacion_y = clampf(rotacion_y, -1.4, 1.4)
+		# FIX: Ampliado a -1.5 para poder rotar por debajo de la nave
+		rotacion_y = clampf(rotacion_y, -1.5, 1.5)
 
 func _physics_process(_delta: float) -> void:
 	if not objetivo:

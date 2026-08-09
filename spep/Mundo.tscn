@@ -8,8 +8,8 @@
 [ext_resource type="Script" uid="uid://b4ecuqs4llasu" path="res://mapa_orbital.gd" id="6_5ckkb"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aou4a"]
-margin = 0.004
-radius = 999.9
+margin = 0.0
+radius = 999.4
 
 [sub_resource type="SphereMesh" id="SphereMesh_5ckkb"]
 radius = 1000.0
@@ -30,8 +30,14 @@ material = SubResource("StandardMaterial3D_aou4a")
 radius = 1150.0
 height = 2300.0
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ws11t"]
-size = Vector3(1, 1.1043701, 1)
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ws11t"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ja4so"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ja4so"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ws11t"]
+material = SubResource("StandardMaterial3D_ja4so")
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pij3u"]
 
@@ -62,7 +68,6 @@ outer_radius = 0.5
 
 [node name="Planeta" type="StaticBody3D" parent="." unique_id=88448087]
 script = ExtResource("1_5ckkb")
-FactorGravedad = 0.18
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta" unique_id=2009365636]
 shape = SubResource("SphereShape3D_aou4a")
@@ -75,22 +80,26 @@ rotation_order = 0
 mesh = SubResource("SphereMesh_2hh7m")
 script = ExtResource("2_aou4a")
 
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="Planeta" unique_id=1207578434]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09281242, 0.20692354, 999.6661)
-shape = SubResource("BoxShape3D_ws11t")
+[node name="Base" type="StaticBody3D" parent="Planeta" unique_id=2035427737]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47380602, 1000.0161)
+physics_material_override = SubResource("PhysicsMaterial_ws11t")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta/Base" unique_id=1630295610]
+shape = SubResource("BoxShape3D_ja4so")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Planeta/Base" unique_id=1109852125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.015991211)
+mesh = SubResource("BoxMesh_ws11t")
 
 [node name="Cohete" type="RigidBody3D" parent="." unique_id=468476956 node_paths=PackedStringArray("ThrustPoint")]
-transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 0.3937307, 1000.36273)
+transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 0.38429418, 1000.6509)
 physics_material_override = SubResource("PhysicsMaterial_pij3u")
 can_sleep = false
 linear_damp = 0.1
 angular_damp = 0.4
 script = ExtResource("3_5ckkb")
 ThrustPoint = NodePath("Motor/Marker3D")
-CombustibleMax = 700.0
-OxidanteMax = 700.0
-MasaSeca = 2.0
-EmpujeMax = 50000.0
+EmpujeMax = 10000.0
 
 [node name="Combustible" type="MeshInstance3D" parent="Cohete" unique_id=1913945744]
 transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0, 0)
@@ -132,8 +141,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3681641, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
 script = ExtResource("2_fw4w5")
 objetivo = NodePath("../Cohete")
-velocidad_zoom = 1.0
 distancia_min = 1.0
+distancia_max = 80.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
 
