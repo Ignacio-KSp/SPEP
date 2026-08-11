@@ -31,8 +31,10 @@ public partial class Cohete : RigidBody3D
 	[Export] public float IspAtmosfera { get; set; } = 260.0f;
 	[Export] public float RatioOxidante { get; set; } = 1.2f;
 	// Multiplicador de empuje: escala EmpujeMax a las unidades del mundo de Godot.
-	// Antes era un "15.0f" fijo escondido en el código; ahora es ajustable desde el Inspector.
-	[Export] public float EscalaEmpuje { get; set; } = 15.0f;
+	// OJO: con un planeta chico (10 km) la velocidad de escape es ~440 m/s, así
+	// que un multiplicador alto (ej. 15) te hace superarla en 1-2 segundos de
+	// empuje a fondo. Con 1.0-2.0 el vuelo es mucho más controlable.
+	[Export] public float EscalaEmpuje { get; set; } = 2.0f;
 
 	// ======================
 	// CONTROL Y SAS
@@ -68,8 +70,18 @@ public partial class Cohete : RigidBody3D
 		// Activar Detección Continua de Colisiones para máxima precisión con Jolt
 		ContinuousCd = true;
 
+		// El damping de RigidBody3D es una resistencia "de juguete" que Godot aplica
+		// SIEMPRE, haya o no atmósfera. Con LinearDamp>0 el cohete perdía velocidad
+		// incluso en el vacío, generando un "límite" artificial de velocidad.
+		// Nuestra propia función AplicarDrag() ya simula la resistencia real del
+		// aire (y la desactiva fuera de la atmósfera), así que el damping propio
+		// del cuerpo rígido debe quedar en 0.
+		// DampMode.Replace evita que se sume el damping por defecto del proyecto.
+		LinearDamp = 0.0f;
+		LinearDampMode = DampMode.Replace;
+
 		AngularDamp = 0.4f;
-		LinearDamp = 0.05f;
+		AngularDampMode = DampMode.Replace;
 
 		motorEncendido = false;
 		throttle = 0.0f;

@@ -92,7 +92,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.015991211)
 mesh = SubResource("BoxMesh_ws11t")
 
 [node name="Cohete" type="RigidBody3D" parent="." unique_id=468476956 node_paths=PackedStringArray("ThrustPoint")]
-transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 4.6044173, 10000.824)
+transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 4.80884, 10000.763)
 physics_material_override = SubResource("PhysicsMaterial_pij3u")
 can_sleep = false
 linear_damp = 0.1
@@ -141,8 +141,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3681641, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
 script = ExtResource("2_fw4w5")
 objetivo = NodePath("../Cohete")
-distancia_min = 1.0
-distancia_max = 80.0
+distancia_min = 0.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
 
@@ -158,17 +157,17 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Altitud" type="Label" parent="CanvasLayer/HUD" unique_id=871539434]
 layout_mode = 0
-offset_left = 46.0
-offset_top = 235.0
-offset_right = 86.0
-offset_bottom = 258.0
+offset_left = 14.0
+offset_top = 16.0
+offset_right = 54.0
+offset_bottom = 39.0
 
 [node name="Velocidad" type="Label" parent="CanvasLayer/HUD" unique_id=1062363241]
 layout_mode = 0
-offset_left = 26.0
-offset_top = 204.0
-offset_right = 66.0
-offset_bottom = 227.0
+offset_left = 17.0
+offset_top = 34.0
+offset_right = 57.0
+offset_bottom = 57.0
 
 [node name="Throttle" type="Label" parent="CanvasLayer/HUD" unique_id=1959020654]
 layout_mode = 0
@@ -179,25 +178,24 @@ offset_bottom = 185.0
 
 [node name="Combustible" type="Label" parent="CanvasLayer/HUD" unique_id=583526489]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 57.0
-offset_right = 59.0
-offset_bottom = 80.0
+offset_left = 13.0
+offset_top = 38.0
+offset_right = 53.0
+offset_bottom = 61.0
 
 [node name="Motor" type="Label" parent="CanvasLayer/HUD" unique_id=1623506279]
 layout_mode = 0
-offset_left = 30.0
-offset_top = 20.0
-offset_right = 70.0
-offset_bottom = 43.0
+offset_left = 17.0
+offset_top = 73.0
+offset_right = 57.0
+offset_bottom = 96.0
 
 [node name="SAS" type="Label" parent="CanvasLayer/HUD" unique_id=1863181072]
 layout_mode = 0
-offset_left = 36.0
-offset_top = 100.0
-offset_right = 76.0
-offset_bottom = 123.0
+offset_left = 16.0
+offset_top = 81.0
+offset_right = 56.0
+offset_bottom = 104.0
 
 [node name="MapaOrbital" type="Node3D" parent="." unique_id=815434377]
 script = ExtResource("6_5ckkb")
-altura_inicial_mapa = 10000.0

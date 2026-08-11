@@ -10,7 +10,14 @@ extends Node3D
 
 @export var puntos_trayectoria: int = 600
 @export var dt_prediccion: float = 0.15
-@export var altura_inicial_mapa: float = 2800.0
+@export var altura_inicial_mapa: float = 40000.0
+
+# Plano de corte de la cámara del mapa. Igual que en camera_seguimiento.gd:
+# si "far" es menor que la distancia a la que está la cámara del centro del
+# planeta, el planeta directamente no se dibuja (desaparece). Godot pone por
+# defecto far≈4000, que se queda muy corto apenas alejás el mapa un poco.
+@export var mapa_near_clip: float = 1.0
+@export var mapa_far_clip: float = 1000000.0
 
 var mapa_activo: bool = false
 var linea: MeshInstance3D
@@ -20,6 +27,9 @@ var camara_mapa: Camera3D
 var rotacion_mapa_x: float = 0.0
 var rotacion_mapa_y: float = 0.6
 var distancia_mapa: float = 2800.0
+var distancia_mapa_min: float = 500.0
+var distancia_mapa_max: float = 500000.0
+var factor_zoom_mapa: float = 0.12
 var arrastrando_izq: bool = false
 var arrastrando_der: bool = false
 
@@ -62,6 +72,8 @@ func _ready() -> void:
 	camara_mapa.name = "CamaraMapa"
 	add_child(camara_mapa)
 	camara_mapa.current = false
+	camara_mapa.near = mapa_near_clip
+	camara_mapa.far = mapa_far_clip
 	distancia_mapa = altura_inicial_mapa
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -75,9 +87,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			arrastrando_der = event.pressed
 		
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			distancia_mapa = clampf(distancia_mapa - 90.0, 400.0, 9000.0)
+			distancia_mapa = clampf(distancia_mapa * (1.0 - factor_zoom_mapa), distancia_mapa_min, distancia_mapa_max)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			distancia_mapa = clampf(distancia_mapa + 90.0, 400.0, 9000.0)
+			distancia_mapa = clampf(distancia_mapa * (1.0 + factor_zoom_mapa), distancia_mapa_min, distancia_mapa_max)
 	
 	if event is InputEventMouseMotion:
 		if arrastrando_izq or arrastrando_der:
@@ -180,6 +192,11 @@ func actualizar_trayectoria() -> void:
 			if semi_eje_mayor > 0.0:
 				var periodo = TAU * sqrt(pow(semi_eje_mayor, 3.0) / gm)
 				paso = clampf(periodo / float(puntos_trayectoria), 0.02, 30.0)
+		else:
+			# Trayectoria de escape (hiperbólica/parabólica): no hay período
+			# orbital, así que escalamos el paso con la velocidad actual para
+			# no perder resolución cerca del planeta ni quedarnos cortos lejos.
+			paso = clampf(radio_p / max(vel.length(), 1.0), 0.02, 5.0)
 	
 	# Predicción más larga y estable
 	for i in range(puntos_trayectoria):
