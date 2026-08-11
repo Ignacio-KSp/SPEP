@@ -6,6 +6,13 @@ public partial class HUD : Control
 
 	private Cohete cohete;
 
+	// Llamado por GestorLanzamiento cuando instancia la nave activa,
+	// para no depender de un NodePath fijo a un nodo "Cohete" de prueba.
+	public void AsignarCohete(Cohete nave)
+	{
+		cohete = nave;
+	}
+
 	private Label labelAltitud;
 	private Label labelVelocidad;
 	private Label labelThrottle;
@@ -17,15 +24,15 @@ public partial class HUD : Control
 	{
 		cohete = GetNodeOrNull<Cohete>(CohetePath);
 
-		labelAltitud = GetNodeOrNull<Label>("Altitud");
-		labelVelocidad = GetNodeOrNull<Label>("Velocidad");
-		labelThrottle = GetNodeOrNull<Label>("Throttle");
-		labelCombustible = GetNodeOrNull<Label>("Combustible");
-		labelMotor = GetNodeOrNull<Label>("Motor");
-		labelSas = GetNodeOrNull<Label>("SAS");
+		labelAltitud = GetNodeOrNull<Label>("Lista/Altitud");
+		labelVelocidad = GetNodeOrNull<Label>("Lista/Velocidad");
+		labelThrottle = GetNodeOrNull<Label>("Lista/Throttle");
+		labelCombustible = GetNodeOrNull<Label>("Lista/Combustible");
+		labelMotor = GetNodeOrNull<Label>("Lista/Motor");
+		labelSas = GetNodeOrNull<Label>("Lista/SAS");
 
 		if (cohete == null)
-			GD.PushError("HUD: No se encontró el Cohete");
+			GD.Print("HUD: esperando a que GestorLanzamiento asigne la nave...");
 
 		if (labelAltitud == null) GD.PushError("Falta Label Altitud");
 		if (labelVelocidad == null) GD.PushError("Falta Label Velocidad");

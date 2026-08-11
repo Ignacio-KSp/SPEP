@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Parte.cs" id="1_parte"]
+[ext_resource type="Script" path="res://PuntoUnion.cs" id="2_punto"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_cabina"]
+top_radius = 0.0
+bottom_radius = 0.4
+height = 0.8
+
+[node name="Cabina" type="Node3D"]
+script = ExtResource("1_parte")
+NombreParte = "Cabina Básica"
+Tipo = 3
+MasaSeca = 0.3
+Diametro = 0.8
+CoeficienteDrag = 0.15
+AreaFrontal = 0.5
+
+[node name="Malla" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+mesh = SubResource("CylinderMesh_cabina")
+
+[node name="UnionAbajo" type="Marker3D" parent="."]
+script = ExtResource("2_punto")
+Tipo = 1
+Diametro = 0.8

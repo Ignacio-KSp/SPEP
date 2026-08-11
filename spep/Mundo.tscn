@@ -3,13 +3,13 @@
 [ext_resource type="Script" uid="uid://dlujv134wg2cr" path="res://Planeta.cs" id="1_5ckkb"]
 [ext_resource type="Script" uid="uid://soxyh1qu4hrc" path="res://Admosfera.gd" id="2_aou4a"]
 [ext_resource type="Script" uid="uid://draumge2n2xss" path="res://camera_seguimiento.gd" id="2_fw4w5"]
-[ext_resource type="Script" uid="uid://cinf4ik3nu8le" path="res://Cohete.cs" id="3_5ckkb"]
 [ext_resource type="Script" uid="uid://bteyrn64dygu5" path="res://HUD.cs" id="5_5ckkb"]
 [ext_resource type="Script" uid="uid://b4ecuqs4llasu" path="res://mapa_orbital.gd" id="6_5ckkb"]
+[ext_resource type="Script" uid="uid://bnvfix7f7yxrt" path="res://GestorLanzamiento.cs" id="7_5ckkb"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aou4a"]
 margin = 0.0
-radius = 9994.0
+radius = 9991.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_5ckkb"]
 radius = 10000.0
@@ -39,31 +39,6 @@ height = 160000.0
 [sub_resource type="BoxMesh" id="BoxMesh_ws11t"]
 material = SubResource("StandardMaterial3D_ja4so")
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_pij3u"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_0oi55"]
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_57gmc"]
-height = 3.272583
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_0crsg"]
-top_radius = 0.0
-height = 1.0
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_5g5eo"]
-top_radius = 0.2
-height = 0.605
-
-[sub_resource type="TorusMesh" id="TorusMesh_lwdvv"]
-inner_radius = 0.2
-outer_radius = 0.5
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_qobow"]
-
-[sub_resource type="PointMesh" id="PointMesh_744hw"]
-
-[sub_resource type="Skin" id="Skin_8wx08"]
-
 [node name="mundo" type="Node3D" unique_id=1299125237]
 
 [node name="Planeta" type="StaticBody3D" parent="." unique_id=88448087]
@@ -81,7 +56,7 @@ mesh = SubResource("SphereMesh_2hh7m")
 script = ExtResource("2_aou4a")
 
 [node name="Base" type="StaticBody3D" parent="Planeta" unique_id=2035427737]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.73806, 10000.161)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.73806, 9990.992)
 physics_material_override = SubResource("PhysicsMaterial_ws11t")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta/Base" unique_id=1630295610]
@@ -91,111 +66,56 @@ shape = SubResource("BoxShape3D_ja4so")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.015991211)
 mesh = SubResource("BoxMesh_ws11t")
 
-[node name="Cohete" type="RigidBody3D" parent="." unique_id=468476956 node_paths=PackedStringArray("ThrustPoint")]
-transform = Transform3D(1, 0, 0, 0, -0.032731332, -0.9994642, 0, 0.9994642, -0.032731332, 0, 4.80884, 10000.763)
-physics_material_override = SubResource("PhysicsMaterial_pij3u")
-can_sleep = false
-linear_damp = 0.1
-angular_damp = 0.4
-script = ExtResource("3_5ckkb")
-ThrustPoint = NodePath("Motor/Marker3D")
-EmpujeMax = 10000.0
-
-[node name="Combustible" type="MeshInstance3D" parent="Cohete" unique_id=1913945744]
-transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0, 0)
-mesh = SubResource("CylinderMesh_0oi55")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Cohete" unique_id=1199437100]
-transform = Transform3D(0.08, 0, 0, 0, 0.079999864, 0, 0, 0, 0.079999864, 0, 0.0048828125, 0)
-shape = SubResource("CylinderShape3D_57gmc")
-
-[node name="Cabina" type="MeshInstance3D" parent="Cohete" unique_id=1470653137]
-transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0.1184082, 0)
-mesh = SubResource("CylinderMesh_0crsg")
-
-[node name="Motor" type="Node3D" parent="Cohete" unique_id=1724604617]
-transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, 0, 0, 0)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Cohete/Motor" unique_id=557263977]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0093688965, -1.2926025, 0)
-mesh = SubResource("CylinderMesh_5g5eo")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="Cohete/Motor" unique_id=1699245380]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00063323975, -1.104248, 0.008576691)
-mesh = SubResource("TorusMesh_lwdvv")
-
-[node name="GPUParticles3D" type="GPUParticles3D" parent="Cohete/Motor" unique_id=795445414]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.01838684, -1.4899902, 0)
-local_coords = true
-transform_align = 3
-process_material = SubResource("ParticleProcessMaterial_qobow")
-draw_pass_1 = SubResource("PointMesh_744hw")
-draw_skin = SubResource("Skin_8wx08")
-
-[node name="Marker3D" type="Marker3D" parent="Cohete/Motor" unique_id=1420857880]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3681641, 0)
-
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1224654292]
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1244693703 node_paths=PackedStringArray("objetivo")]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1244693703]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
 script = ExtResource("2_fw4w5")
-objetivo = NodePath("../Cohete")
 distancia_min = 0.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
 
 [node name="HUD" type="Control" parent="CanvasLayer" unique_id=586649092]
 layout_mode = 3
-anchor_top = -0.0046296297
-anchor_right = 0.012152778
-anchor_bottom = -0.0046296297
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 240.0
+offset_bottom = 220.0
 script = ExtResource("5_5ckkb")
-metadata/_edit_use_anchors_ = true
 
-[node name="Altitud" type="Label" parent="CanvasLayer/HUD" unique_id=871539434]
+[node name="Lista" type="VBoxContainer" parent="CanvasLayer/HUD" unique_id=267653321]
 layout_mode = 0
-offset_left = 14.0
-offset_top = 16.0
-offset_right = 54.0
-offset_bottom = 39.0
+offset_right = 220.0
+offset_bottom = 200.0
+theme_override_constants/separation = 6
 
-[node name="Velocidad" type="Label" parent="CanvasLayer/HUD" unique_id=1062363241]
-layout_mode = 0
-offset_left = 17.0
-offset_top = 34.0
-offset_right = 57.0
-offset_bottom = 57.0
+[node name="Altitud" type="Label" parent="CanvasLayer/HUD/Lista" unique_id=871539434]
+layout_mode = 2
+text = "Altitud: -"
 
-[node name="Throttle" type="Label" parent="CanvasLayer/HUD" unique_id=1959020654]
-layout_mode = 0
-offset_left = 38.0
-offset_top = 162.0
-offset_right = 78.0
-offset_bottom = 185.0
+[node name="Velocidad" type="Label" parent="CanvasLayer/HUD/Lista" unique_id=1062363241]
+layout_mode = 2
+text = "Velocidad: -"
 
-[node name="Combustible" type="Label" parent="CanvasLayer/HUD" unique_id=583526489]
-layout_mode = 0
-offset_left = 13.0
-offset_top = 38.0
-offset_right = 53.0
-offset_bottom = 61.0
+[node name="Combustible" type="Label" parent="CanvasLayer/HUD/Lista" unique_id=583526489]
+layout_mode = 2
+text = "Combustible: -"
 
-[node name="Motor" type="Label" parent="CanvasLayer/HUD" unique_id=1623506279]
-layout_mode = 0
-offset_left = 17.0
-offset_top = 73.0
-offset_right = 57.0
-offset_bottom = 96.0
+[node name="Throttle" type="Label" parent="CanvasLayer/HUD/Lista" unique_id=1959020654]
+layout_mode = 2
+text = "Throttle: -"
 
-[node name="SAS" type="Label" parent="CanvasLayer/HUD" unique_id=1863181072]
-layout_mode = 0
-offset_left = 16.0
-offset_top = 81.0
-offset_right = 56.0
-offset_bottom = 104.0
+[node name="Motor" type="Label" parent="CanvasLayer/HUD/Lista" unique_id=1623506279]
+layout_mode = 2
+text = "Motor: -"
+
+[node name="SAS" type="Label" parent="CanvasLayer/HUD/Lista" unique_id=1863181072]
+layout_mode = 2
+text = "SAS: -"
 
 [node name="MapaOrbital" type="Node3D" parent="." unique_id=815434377]
 script = ExtResource("6_5ckkb")
+
+[node name="GestorLanzamiento" type="Node3D" parent="." unique_id=100000001]
+script = ExtResource("7_5ckkb")

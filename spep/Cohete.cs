@@ -9,77 +9,57 @@ public partial class Cohete : RigidBody3D
 	[Export] public NodePath PlanetaPath { get; set; } = new NodePath("../Planeta");
 	private Planeta planeta;
 
-	[Export] public Node3D ThrustPoint { get; set; }
-
 	// ======================
-	// TANQUE
-	// ======================
-	[ExportGroup("Tanque")]
-	[Export] public float CombustibleMax { get; set; } = 700.0f;
-	[Export] public float OxidanteMax { get; set; } = 700.0f;
-	[Export] public float MasaSeca { get; set; } = 2.0f;
-
-	private float combustible;
-	private float oxidante;
-
-	// ======================
-	// MOTOR
-	// ======================
-	[ExportGroup("Motor")]
-	[Export] public float EmpujeMax { get; set; } = 50000.0f;
-	[Export] public float IspVacio { get; set; } = 320.0f;
-	[Export] public float IspAtmosfera { get; set; } = 260.0f;
-	[Export] public float RatioOxidante { get; set; } = 1.2f;
-	// Multiplicador de empuje: escala EmpujeMax a las unidades del mundo de Godot.
-	// OJO: con un planeta chico (10 km) la velocidad de escape es ~440 m/s, así
-	// que un multiplicador alto (ej. 15) te hace superarla en 1-2 segundos de
-	// empuje a fondo. Con 1.0-2.0 el vuelo es mucho más controlable.
-	[Export] public float EscalaEmpuje { get; set; } = 2.0f;
-
-	// ======================
-	// CONTROL Y SAS
+	// CONTROL Y SAS (esto SÍ son ajustes de pilotaje, no de la nave)
 	// ======================
 	[ExportGroup("Control")]
 	[Export] public float PotenciaRotacion { get; set; } = 60.0f;
 	[Export] public float PotenciaSas { get; set; } = 45.0f;
 	[Export] public float ThrottleSpeed { get; set; } = 1.5f;
+	[Export] public float EscalaEmpuje { get; set; } = 2.0f;
+	[Export] public float RatioOxidante { get; set; } = 1.2f;
 
 	private float throttle = 0.0f;
 	private bool motorEncendido = false;
 	private bool sasActivado = false;
-
 	private Dictionary<Key, bool> teclasAnteriores = new Dictionary<Key, bool>();
 
 	// ======================
-	// FÍSICA DEL VEHÍCULO
+	// DATOS AGREGADOS DE LAS PIEZAS
+	// Estos NO se tocan a mano: se calculan solos recorriendo los nodos
+	// "Parte" que cuelgan de este Cohete. Cambiaste las piezas -> cambian solos.
 	// ======================
-	[ExportGroup("Física del Vehículo")]
-	[Export] public float AreaFrontal { get; set; } = 1.8f;
-	[Export] public float CoeficienteDrag { get; set; } = 0.4f;
+	private float masaSecaTotal = 0.5f;
+	private float combustibleMax = 0.0f;
+	private float oxidanteMax = 0.0f;
+	private float combustible = 0.0f;
+	private float oxidante = 0.0f;
+	private float areaFrontalTotal = 1.0f;
+	private float dragPromedio = 0.3f;
+
+	private struct MotorActivo
+	{
+		public Parte Parte;
+		public Node3D PuntoEmpuje;
+	}
+	private List<MotorActivo> motores = new List<MotorActivo>();
 
 	public override void _Ready()
 	{
-		combustible = CombustibleMax;
-		oxidante = OxidanteMax;
+		planeta = GetNodeOrNull<Planeta>(PlanetaPath);
+
+		RecolectarPartes();
+		combustible = combustibleMax;
+		oxidante = oxidanteMax;
 		ActualizarMasa();
 
 		CanSleep = false;
 		Sleeping = false;
 		GravityScale = 0.0f;
-
-		// Activar Detección Continua de Colisiones para máxima precisión con Jolt
 		ContinuousCd = true;
 
-		// El damping de RigidBody3D es una resistencia "de juguete" que Godot aplica
-		// SIEMPRE, haya o no atmósfera. Con LinearDamp>0 el cohete perdía velocidad
-		// incluso en el vacío, generando un "límite" artificial de velocidad.
-		// Nuestra propia función AplicarDrag() ya simula la resistencia real del
-		// aire (y la desactiva fuera de la atmósfera), así que el damping propio
-		// del cuerpo rígido debe quedar en 0.
-		// DampMode.Replace evita que se sume el damping por defecto del proyecto.
 		LinearDamp = 0.0f;
 		LinearDampMode = DampMode.Replace;
-
 		AngularDamp = 0.4f;
 		AngularDampMode = DampMode.Replace;
 
@@ -87,11 +67,58 @@ public partial class Cohete : RigidBody3D
 		throttle = 0.0f;
 		sasActivado = false;
 
-		planeta = GetNodeOrNull<Planeta>(PlanetaPath);
+		AddToGroup("cohete_activo");
 
-		GD.Print("=== Cohete listo (C#) ===");
+		GD.Print($"=== Cohete ensamblado: {motores.Count} motor(es), masa seca {masaSecaTotal:F1} kg, " +
+			$"{combustibleMax + oxidanteMax:F0} kg de propelente ===");
+
 		if (planeta == null)
 			GD.PushWarning("No se encontró el planeta (o el nodo no tiene el script Planeta.cs)");
+		if (motores.Count == 0)
+			GD.PushWarning("Esta nave no tiene ninguna 'Parte' marcada como EsMotor=true");
+	}
+
+	// Recorre TODOS los descendientes buscando nodos "Parte" y suma sus datos.
+	// Llamala de nuevo si desacoplás/agregás piezas en pleno vuelo.
+	public void RecolectarPartes()
+	{
+		combustibleMax = 0f;
+		oxidanteMax = 0f;
+		masaSecaTotal = 0f;
+		areaFrontalTotal = 0f;
+		float dragAcumulado = 0f;
+		motores.Clear();
+
+		foreach (Parte parte in ObtenerPartes(this))
+		{
+			masaSecaTotal += parte.MasaSeca;
+			combustibleMax += parte.CapacidadCombustible;
+			oxidanteMax += parte.CapacidadOxidante;
+			areaFrontalTotal += parte.AreaFrontal;
+			dragAcumulado += parte.CoeficienteDrag * parte.AreaFrontal;
+
+			if (parte.EsMotor)
+			{
+				Node3D punto = parte.PuntoEmpujePath != null
+					? parte.GetNodeOrNull<Node3D>(parte.PuntoEmpujePath)
+					: null;
+				motores.Add(new MotorActivo { Parte = parte, PuntoEmpuje = punto ?? parte });
+			}
+		}
+
+		dragPromedio = areaFrontalTotal > 0f ? dragAcumulado / areaFrontalTotal : 0.3f;
+		if (masaSecaTotal <= 0f) masaSecaTotal = 0.5f; // nunca 0, evita masa=0
+	}
+
+	private IEnumerable<Parte> ObtenerPartes(Node nodo)
+	{
+		foreach (Node hijo in nodo.GetChildren())
+		{
+			if (hijo is Parte p)
+				yield return p;
+			foreach (Parte nieta in ObtenerPartes(hijo))
+				yield return nieta;
+		}
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -183,7 +210,7 @@ public partial class Cohete : RigidBody3D
 
 	private void AplicarEmpuje(float delta)
 	{
-		if (combustible <= 0.0f || oxidante <= 0.0f)
+		if (combustible <= 0.0f || oxidante <= 0.0f || motores.Count == 0)
 		{
 			motorEncendido = false;
 			throttle = 0.0f;
@@ -191,14 +218,24 @@ public partial class Cohete : RigidBody3D
 		}
 
 		float densidad = planeta != null ? planeta.GetDensidadAtmosfera(GlobalPosition) : 0.0f;
-
-		float isp = Mathf.Lerp(IspAtmosfera, IspVacio, 1.0f - densidad);
-
-		// Factor de escala aplicado para adaptarlo a las unidades del mundo de Godot
-		float empujeActual = EmpujeMax * throttle * EscalaEmpuje;
-
 		float g0 = 9.81f;
-		float consumoTotal = (EmpujeMax * throttle / (isp * g0)) * delta * 0.1f;
+		float consumoTotal = 0f;
+
+		// Cada motor empuja en la dirección de SU PROPIO punto de empuje
+		// (no necesariamente el eje de la nave entera: sirve para motores
+		// radiales, vernier, etc, además del motor principal apilado).
+		foreach (var m in motores)
+		{
+			float isp = Mathf.Lerp(m.Parte.IspAtmosfera, m.Parte.IspVacio, 1.0f - densidad);
+			float empujeMotor = m.Parte.EmpujeMax * throttle * EscalaEmpuje;
+
+			Vector3 direccionEmpuje = m.PuntoEmpuje.GlobalTransform.Basis.Y.Normalized();
+			Vector3 brazoPalanca = m.PuntoEmpuje.GlobalPosition - GlobalPosition;
+			ApplyForce(direccionEmpuje * empujeMotor, brazoPalanca);
+
+			consumoTotal += (m.Parte.EmpujeMax * throttle / (isp * g0)) * delta * 0.1f;
+		}
+
 		float consumoComb = consumoTotal / (1.0f + RatioOxidante);
 		float consumoOxi = consumoTotal - consumoComb;
 
@@ -213,22 +250,10 @@ public partial class Cohete : RigidBody3D
 
 		combustible -= consumoComb;
 		oxidante -= consumoOxi;
-
-		// CLAVE: el empuje se aplica en la dirección en la que apunta la nave
-		// (su eje local +Y, hacia la "nariz"/cabina), NO hacia afuera del planeta.
-		// Así, cuando rotás el cohete con WASD/QE, el empuje también gira con él
-		// y podés inclinar la trayectoria para "hacer la gravedad" (gravity turn).
-		Vector3 direccionEmpuje = GlobalTransform.Basis.Y.Normalized();
-
-		ApplyCentralForce(direccionEmpuje * empujeActual);
 	}
 
 	private void AplicarGravedad()
 	{
-		// Gravedad newtoniana real (F = G*M*m/r^2), igual a la que usa el mapa
-		// orbital para predecir la trayectoria. Antes acá había una gravedad
-		// constante de 9.81 m/s² sin importar la altura, que no coincidía con
-		// la línea verde del mapa orbital y no permitía órbitas reales.
 		Vector3 fuerzaGravedad = planeta.GetGravedadEn(GlobalPosition, Mass);
 		ApplyCentralForce(fuerzaGravedad);
 	}
@@ -241,13 +266,13 @@ public partial class Cohete : RigidBody3D
 		Vector3 velocidad = LinearVelocity;
 		if (velocidad.LengthSquared() < 0.5f) return;
 
-		float fuerzaDrag = 0.5f * densidad * velocidad.LengthSquared() * CoeficienteDrag * AreaFrontal;
+		float fuerzaDrag = 0.5f * densidad * velocidad.LengthSquared() * dragPromedio * areaFrontalTotal;
 		ApplyCentralForce(-velocidad.Normalized() * fuerzaDrag);
 	}
 
 	private void ActualizarMasa()
 	{
-		Mass = MasaSeca + combustible + oxidante;
+		Mass = masaSecaTotal + combustible + oxidante;
 	}
 
 	public float GetAltitud()
@@ -257,8 +282,8 @@ public partial class Cohete : RigidBody3D
 	}
 
 	public float GetThrottle() => throttle;
-	public float GetCombustiblePorcentaje() => CombustibleMax > 0 ? combustible / CombustibleMax : 0.0f;
-	public float GetOxidantePorcentaje() => OxidanteMax > 0 ? oxidante / OxidanteMax : 0.0f;
+	public float GetCombustiblePorcentaje() => combustibleMax > 0 ? combustible / combustibleMax : 0.0f;
+	public float GetOxidantePorcentaje() => oxidanteMax > 0 ? oxidante / oxidanteMax : 0.0f;
 	public float GetMasaTotal() => Mass;
 	public bool EstaMotorEncendido() => motorEncendido && throttle > 0.01f && combustible > 0.0f;
 	public bool GetSas() => sasActivado;
