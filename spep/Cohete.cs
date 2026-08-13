@@ -1,5 +1,8 @@
 using Godot;
 using System.Collections.Generic;
+using Godot;
+using System.Collections.Generic;
+using System.Linq;
 
 public partial class Cohete : RigidBody3D
 {
@@ -81,7 +84,31 @@ public partial class Cohete : RigidBody3D
 	// Recorre TODOS los descendientes buscando nodos "Parte" y suma sus datos.
 	// Llamala de nuevo si desacoplás/agregás piezas en pleno vuelo.
 	public void RecolectarPartes()
+	private void ReubicarColisiones()
 	{
+		var formas = ObtenerColisiones(this).ToList();
+		foreach (CollisionShape3D forma in formas)
+		{
+			if (forma.GetParent() == this) continue;
+
+			Transform3D transformGlobal = forma.GlobalTransform;
+			forma.GetParent().RemoveChild(forma);
+			AddChild(forma);
+			forma.GlobalTransform = transformGlobal;
+		}
+	}
+
+	private IEnumerable<CollisionShape3D> ObtenerColisiones(Node nodo)
+	{
+		foreach (Node hijo in nodo.GetChildren())
+		{
+			if (hijo is CollisionShape3D cs)
+				yield return cs;
+			foreach (CollisionShape3D nieta in ObtenerColisiones(hijo))
+				yield return nieta;
+		}
+	}
+		ReubicarColisiones();
 		combustibleMax = 0f;
 		oxidanteMax = 0f;
 		masaSecaTotal = 0f;

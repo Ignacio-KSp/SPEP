@@ -1,14 +1,14 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://coguqj4kitn1i"]
 
-[ext_resource type="Script" path="res://Parte.cs" id="1_parte"]
-[ext_resource type="Script" path="res://PuntoUnion.cs" id="2_punto"]
+[ext_resource type="Script" uid="uid://d06xf63abrcjm" path="res://Parte.cs" id="1_parte"]
+[ext_resource type="Script" uid="uid://cb2vdebm0nccf" path="res://PuntoUnion.cs" id="2_punto"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_motor"]
 top_radius = 0.3
 bottom_radius = 0.15
 height = 0.6
 
-[node name="Motor" type="Node3D"]
+[node name="Motor" type="Node3D" unique_id=2028910284]
 script = ExtResource("1_parte")
 NombreParte = "Motor Básico"
 Tipo = 2
@@ -22,15 +22,14 @@ IspVacio = 320.0
 IspAtmosfera = 260.0
 PuntoEmpujePath = NodePath("PuntoEmpuje")
 
-[node name="Malla" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+[node name="Malla" type="MeshInstance3D" parent="." unique_id=357515494]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.10757427, 0)
 mesh = SubResource("CylinderMesh_motor")
 
-[node name="PuntoEmpuje" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+[node name="PuntoEmpuje" type="Marker3D" parent="." unique_id=2073030587]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.46520466, 0)
 
-[node name="UnionArriba" type="Marker3D" parent="."]
+[node name="UnionArriba" type="Marker3D" parent="." unique_id=38862370]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
 script = ExtResource("2_punto")
-Tipo = 0
 Diametro = 0.8

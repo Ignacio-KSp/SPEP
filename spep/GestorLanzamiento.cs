@@ -12,7 +12,7 @@ public partial class GestorLanzamiento : Node3D
 
 	[Export] public NodePath BasePath { get; set; } = new NodePath("../Planeta/Base");
 	[Export] public NodePath PlanetaPath { get; set; } = new NodePath("../Planeta");
-	[Export] public float AlturaSobrePlataforma { get; set; } = 0.3f;
+	[Export] public float AlturaSobrePlataforma { get; set; } = 1.5f;
 	[Export] public NodePath CamaraPath { get; set; } = new NodePath("../Camera3D");
 	[Export] public NodePath HudPath { get; set; } = new NodePath("../CanvasLayer/HUD");
 	[Export] public NodePath MapaOrbitalPath { get; set; } = new NodePath("../MapaOrbital");
@@ -47,6 +47,12 @@ public partial class GestorLanzamiento : Node3D
 		GetParent().AddChild(nave);
 		nave.Name = "Cohete";
 		nave.AddToGroup("cohete_activo");
+
+		// La nave se guardó desde el VAB con freeze=true (ahí la queremos
+		// congelada para que no se caiga mientras la armás). Acá, en pleno
+		// vuelo, tiene que estar descongelada o ni la gravedad ni el empuje
+		// del motor la van a mover.
+		nave.Freeze = false;
 
 		if (basePlataforma != null && planetaNodo != null)
 		{

@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://ciqeov753pgky"]
+[gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" uid="uid://dkidnw6e80f8" path="res://VABManager.cs" id="1_vab"]
-[ext_resource type="Script" uid="uid://cinf4ik3nu8le" path="res://Cohete.cs" id="2_cohete"]
+[ext_resource type="Script" path="res://VABManager.cs" id="1_vab"]
+[ext_resource type="Script" path="res://Cohete.cs" id="2_cohete"]
 [ext_resource type="PackedScene" path="res://Partes/Tanque.tscn" id="3_tanque"]
 [ext_resource type="PackedScene" path="res://Partes/Motor.tscn" id="4_motor"]
 [ext_resource type="PackedScene" path="res://Partes/Cabina.tscn" id="5_cabina"]
@@ -9,76 +9,75 @@
 [sub_resource type="PlaneMesh" id="PlaneMesh_piso"]
 size = Vector2(10, 10)
 
-[node name="VAB" type="Node3D" unique_id=365303301]
+[node name="VAB" type="Node3D"]
 script = ExtResource("1_vab")
 PiezaTanque = ExtResource("3_tanque")
 PiezaMotor = ExtResource("4_motor")
 PiezaCabina = ExtResource("5_cabina")
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1730628033]
+[node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.86602545, 0.5, 0, -0.5, 0.86602545, 0, 2.5, 8)
 current = true
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=662196997]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.7071, -0.5, 0.5, 0, 0.7071, 0.7071, -0.7071, -0.5, 0.5, 0, 3, 0)
 
-[node name="Piso" type="MeshInstance3D" parent="." unique_id=212050278]
+[node name="Piso" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
 mesh = SubResource("PlaneMesh_piso")
 
-[node name="RaizNave" type="RigidBody3D" parent="." unique_id=181000613]
-can_sleep = false
+[node name="RaizNave" type="RigidBody3D" parent="."]
 freeze = true
+can_sleep = false
 script = ExtResource("2_cohete")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1563678497]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="UI" type="VBoxContainer" parent="CanvasLayer" unique_id=967071637]
+[node name="UI" type="VBoxContainer" parent="CanvasLayer"]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 220.0
-offset_bottom = 260.0
+offset_bottom = 400.0
 theme_override_constants/separation = 8
 
-[node name="Titulo" type="Label" parent="CanvasLayer/UI" unique_id=573430686]
+[node name="Titulo" type="Label" parent="CanvasLayer/UI"]
 layout_mode = 2
-text = "VAB - Ensamblado"
+text = "VAB - Piezas"
 
-[node name="BotonMotor" type="Button" parent="CanvasLayer/UI" unique_id=1627573560]
+[node name="TarjetaCabina" type="Button" parent="CanvasLayer/UI"]
 layout_mode = 2
-text = "1) Agregar Motor"
+custom_minimum_size = Vector2(180, 60)
+text = "Cabina"
 
-[node name="BotonTanque" type="Button" parent="CanvasLayer/UI" unique_id=1139982952]
+[node name="TarjetaTanque" type="Button" parent="CanvasLayer/UI"]
 layout_mode = 2
-text = "2) Agregar Tanque"
+custom_minimum_size = Vector2(180, 60)
+text = "Tanque"
 
-[node name="BotonCabina" type="Button" parent="CanvasLayer/UI" unique_id=14543170]
+[node name="TarjetaMotor" type="Button" parent="CanvasLayer/UI"]
 layout_mode = 2
-text = "3) Agregar Cabina"
+custom_minimum_size = Vector2(180, 60)
+text = "Motor"
 
-[node name="Info" type="Label" parent="CanvasLayer/UI" unique_id=1844718512]
+[node name="Info" type="Label" parent="CanvasLayer/UI"]
 layout_mode = 2
 text = "Masa total: 0.0 kg"
 
-[node name="BotonReiniciar" type="Button" parent="CanvasLayer/UI" unique_id=1824748012]
+[node name="Aviso" type="Label" parent="CanvasLayer/UI"]
+layout_mode = 2
+autowrap_mode = 2
+text = ""
+
+[node name="BotonReiniciar" type="Button" parent="CanvasLayer/UI"]
 layout_mode = 2
 text = "Reiniciar nave"
 
-[node name="BotonLanzar" type="Button" parent="CanvasLayer/UI" unique_id=1475267075]
+[node name="BotonLanzar" type="Button" parent="CanvasLayer/UI"]
 layout_mode = 2
 text = "Guardar y Lanzar"
 
-[node name="Cabina" parent="." unique_id=20271723 instance=ExtResource("5_cabina")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9607062, 4.455317, -2.7170918)
-
-[node name="Tanque" parent="Cabina" unique_id=2129005927 instance=ExtResource("3_tanque")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.018368483, -1.6077373, 0.0071599483)
-
-[node name="Motor" parent="Cabina" unique_id=1088976294 instance=ExtResource("4_motor")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.087209225, -3.2054331, 0.0052199364)
-
-[connection signal="pressed" from="CanvasLayer/UI/BotonMotor" to="." method="AgregarMotor"]
-[connection signal="pressed" from="CanvasLayer/UI/BotonTanque" to="." method="AgregarTanque"]
-[connection signal="pressed" from="CanvasLayer/UI/BotonCabina" to="." method="AgregarCabina"]
+[connection signal="pressed" from="CanvasLayer/UI/TarjetaCabina" to="." method="SeleccionarCabina"]
+[connection signal="pressed" from="CanvasLayer/UI/TarjetaTanque" to="." method="SeleccionarTanque"]
+[connection signal="pressed" from="CanvasLayer/UI/TarjetaMotor" to="." method="SeleccionarMotor"]
 [connection signal="pressed" from="CanvasLayer/UI/BotonReiniciar" to="." method="Reiniciar"]
 [connection signal="pressed" from="CanvasLayer/UI/BotonLanzar" to="." method="GuardarYLanzar"]

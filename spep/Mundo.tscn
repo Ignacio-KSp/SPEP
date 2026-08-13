@@ -9,7 +9,7 @@
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aou4a"]
 margin = 0.0
-radius = 9991.0
+radius = 9994.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_5ckkb"]
 radius = 10000.0
@@ -33,11 +33,13 @@ height = 160000.0
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ws11t"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ja4so"]
+size = Vector3(5.5700684, 6.107666, 7.7387695)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ja4so"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ws11t"]
 material = SubResource("StandardMaterial3D_ja4so")
+size = Vector3(5.710327, 6.4556274, 7.7470703)
 
 [node name="mundo" type="Node3D" unique_id=1299125237]
 
@@ -56,14 +58,15 @@ mesh = SubResource("SphereMesh_2hh7m")
 script = ExtResource("2_aou4a")
 
 [node name="Base" type="StaticBody3D" parent="Planeta" unique_id=2035427737]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.73806, 9990.992)
+transform = Transform3D(0.9993704, 0, -0.035476983, 0, 1, 0, 0.035476983, 0, 0.9993704, 0, 4.73806, 10000.161)
 physics_material_override = SubResource("PhysicsMaterial_ws11t")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta/Base" unique_id=1630295610]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.3694153)
 shape = SubResource("BoxShape3D_ja4so")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Planeta/Base" unique_id=1109852125]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.015991211)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.3895264)
 mesh = SubResource("BoxMesh_ws11t")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1224654292]
@@ -84,7 +87,7 @@ offset_right = 240.0
 offset_bottom = 220.0
 script = ExtResource("5_5ckkb")
 
-[node name="Lista" type="VBoxContainer" parent="CanvasLayer/HUD" unique_id=267653321]
+[node name="Lista" type="VBoxContainer" parent="CanvasLayer/HUD" unique_id=1302063941]
 layout_mode = 0
 offset_right = 220.0
 offset_bottom = 200.0
