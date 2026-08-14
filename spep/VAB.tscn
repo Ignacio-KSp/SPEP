@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://VABManager.cs" id="1_vab"]
 [ext_resource type="Script" path="res://Cohete.cs" id="2_cohete"]
 [ext_resource type="PackedScene" path="res://Partes/Tanque.tscn" id="3_tanque"]
 [ext_resource type="PackedScene" path="res://Partes/Motor.tscn" id="4_motor"]
 [ext_resource type="PackedScene" path="res://Partes/Cabina.tscn" id="5_cabina"]
+[ext_resource type="Script" path="res://camara_vab.gd" id="6_camvab"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_piso"]
 size = Vector2(10, 10)
@@ -15,9 +16,11 @@ PiezaTanque = ExtResource("3_tanque")
 PiezaMotor = ExtResource("4_motor")
 PiezaCabina = ExtResource("5_cabina")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("objetivo")]
 transform = Transform3D(1, 0, 0, 0, 0.86602545, 0.5, 0, -0.5, 0.86602545, 0, 2.5, 8)
 current = true
+script = ExtResource("6_camvab")
+objetivo = NodePath("../RaizNave")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.7071, -0.5, 0.5, 0, 0.7071, 0.7071, -0.7071, -0.5, 0.5, 0, 3, 0)

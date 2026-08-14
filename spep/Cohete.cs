@@ -1,7 +1,5 @@
 using Godot;
 using System.Collections.Generic;
-using Godot;
-using System.Collections.Generic;
 using System.Linq;
 
 public partial class Cohete : RigidBody3D
@@ -17,10 +15,25 @@ public partial class Cohete : RigidBody3D
 	// ======================
 	[ExportGroup("Control")]
 	[Export] public float PotenciaRotacion { get; set; } = 60.0f;
-	[Export] public float PotenciaSas { get; set; } = 45.0f;
 	[Export] public float ThrottleSpeed { get; set; } = 1.5f;
 	[Export] public float EscalaEmpuje { get; set; } = 2.0f;
 	[Export] public float RatioOxidante { get; set; } = 1.2f;
+
+	// SAS estilo KSP: mantiene una orientación fija en vez de sólo frenar
+	// la rotación. "Rigidez" atrae hacia el objetivo, "Amortiguacion" frena
+	// la velocidad angular. Subilos si el cohete es grande/pesado y el SAS
+	// se siente débil (más masa e inercia = necesita más torque para lo mismo).
+	[Export] public float SasRigidez { get; set; } = 25.0f;
+	[Export] public float SasAmortiguacion { get; set; } = 12.0f;
+
+	// Poné esto en true desde el Inspector para ver en la consola (pestaña
+	// "Salida") la altitud/densidad/fuerza de drag en cada frame, y
+	// confirmar si realmente no hay rozamiento o si el aire ya se hizo
+	// despreciable por la altura (comportamiento normal, no bug).
+	[Export] public bool DebugFisica { get; set; } = false;
+
+	private Quaternion objetivoSas = Quaternion.Identity;
+	private bool ultimoInputManual = false;
 
 	private float throttle = 0.0f;
 	private bool motorEncendido = false;
@@ -84,31 +97,9 @@ public partial class Cohete : RigidBody3D
 	// Recorre TODOS los descendientes buscando nodos "Parte" y suma sus datos.
 	// Llamala de nuevo si desacoplás/agregás piezas en pleno vuelo.
 	public void RecolectarPartes()
-	private void ReubicarColisiones()
 	{
-		var formas = ObtenerColisiones(this).ToList();
-		foreach (CollisionShape3D forma in formas)
-		{
-			if (forma.GetParent() == this) continue;
-
-			Transform3D transformGlobal = forma.GlobalTransform;
-			forma.GetParent().RemoveChild(forma);
-			AddChild(forma);
-			forma.GlobalTransform = transformGlobal;
-		}
-	}
-
-	private IEnumerable<CollisionShape3D> ObtenerColisiones(Node nodo)
-	{
-		foreach (Node hijo in nodo.GetChildren())
-		{
-			if (hijo is CollisionShape3D cs)
-				yield return cs;
-			foreach (CollisionShape3D nieta in ObtenerColisiones(hijo))
-				yield return nieta;
-		}
-	}
 		ReubicarColisiones();
+
 		combustibleMax = 0f;
 		oxidanteMax = 0f;
 		masaSecaTotal = 0f;
@@ -144,6 +135,35 @@ public partial class Cohete : RigidBody3D
 			if (hijo is Parte p)
 				yield return p;
 			foreach (Parte nieta in ObtenerPartes(hijo))
+				yield return nieta;
+		}
+	}
+
+	// CollisionShape3D SOLO funciona si su padre DIRECTO es este RigidBody3D
+	// (regla dura del motor). Las piezas guardan su colisión anidada adentro
+	// porque es más cómodo diseñarlas así, pero acá la "sacamos" y la
+	// reparentamos directo al cohete, conservando su posición/rotación exacta.
+	private void ReubicarColisiones()
+	{
+		var formas = ObtenerColisiones(this).ToList();
+		foreach (CollisionShape3D forma in formas)
+		{
+			if (forma.GetParent() == this) continue;
+
+			Transform3D transformGlobal = forma.GlobalTransform;
+			forma.GetParent().RemoveChild(forma);
+			AddChild(forma);
+			forma.GlobalTransform = transformGlobal;
+		}
+	}
+
+	private IEnumerable<CollisionShape3D> ObtenerColisiones(Node nodo)
+	{
+		foreach (Node hijo in nodo.GetChildren())
+		{
+			if (hijo is CollisionShape3D cs)
+				yield return cs;
+			foreach (CollisionShape3D nieta in ObtenerColisiones(hijo))
 				yield return nieta;
 		}
 	}
@@ -189,6 +209,8 @@ public partial class Cohete : RigidBody3D
 		if (JustPressed(Key.T))
 		{
 			sasActivado = !sasActivado;
+			if (sasActivado)
+				objetivoSas = GlobalTransform.Basis.GetRotationQuaternion();
 			GD.Print("SAS: ", sasActivado ? "ON" : "OFF");
 		}
 
@@ -221,18 +243,38 @@ public partial class Cohete : RigidBody3D
 		if (Input.IsKeyPressed(Key.Q)) torqueLocal.Z += 1.0f;
 		if (Input.IsKeyPressed(Key.E)) torqueLocal.Z -= 1.0f;
 
-		if (torqueLocal != Vector3.Zero)
+		ultimoInputManual = torqueLocal != Vector3.Zero;
+
+		if (ultimoInputManual)
 		{
 			Vector3 torque = GlobalTransform.Basis * (torqueLocal * PotenciaRotacion);
 			ApplyTorque(torque);
+
+			// Mientras piloteás a mano, el SAS "sigue" tu orientación actual.
+			// Así, apenas soltás las teclas, te frena justo donde soltaste
+			// (igual que en KSP, no te devuelve a la orientación de antes).
+			objetivoSas = GlobalTransform.Basis.GetRotationQuaternion();
 		}
 	}
 
 	private void AplicarSas()
 	{
-		Vector3 av = AngularVelocity;
-		if (av.LengthSquared() > 0.0005f)
-			ApplyTorque(-av * PotenciaSas);
+		if (ultimoInputManual) return; // no compite contra tu input manual
+
+		Quaternion actual = GlobalTransform.Basis.GetRotationQuaternion();
+		Quaternion diferencia = (objetivoSas * actual.Inverse()).Normalized();
+
+		Vector3 eje = new Vector3(diferencia.X, diferencia.Y, diferencia.Z);
+		float senoMitad = eje.Length();
+		float angulo = 2.0f * Mathf.Atan2(senoMitad, diferencia.W);
+		if (angulo > Mathf.Pi) angulo -= Mathf.Tau;
+
+		Vector3 direccionCorreccion = senoMitad > 0.0001f ? eje / senoMitad : Vector3.Zero;
+
+		// Control PD: te atrae hacia el objetivo (Rigidez) y frena la
+		// velocidad angular (Amortiguación), igual que un reaction wheel.
+		Vector3 torque = direccionCorreccion * angulo * SasRigidez - AngularVelocity * SasAmortiguacion;
+		ApplyTorque(torque);
 	}
 
 	private void AplicarEmpuje(float delta)
@@ -288,6 +330,12 @@ public partial class Cohete : RigidBody3D
 	private void AplicarDrag()
 	{
 		float densidad = planeta.GetDensidadAtmosfera(GlobalPosition);
+
+		if (DebugFisica)
+		{
+			GD.Print($"Altitud: {planeta.GetAltitud(GlobalPosition):F0} m | Densidad: {densidad:F4} kg/m³ | Vel: {LinearVelocity.Length():F1} m/s");
+		}
+
 		if (densidad <= 0.001f) return;
 
 		Vector3 velocidad = LinearVelocity;

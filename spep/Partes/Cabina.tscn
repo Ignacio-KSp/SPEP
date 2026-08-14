@@ -1,22 +1,18 @@
-[gd_scene format=3 uid="uid://6tt84258qwsp"]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" uid="uid://d06xf63abrcjm" path="res://Parte.cs" id="1_parte"]
-[ext_resource type="Script" uid="uid://cb2vdebm0nccf" path="res://PuntoUnion.cs" id="2_punto"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ja4so"]
+[ext_resource type="Script" path="res://Parte.cs" id="1_parte"]
+[ext_resource type="Script" path="res://PuntoUnion.cs" id="2_punto"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_cabina"]
-material = SubResource("StandardMaterial3D_ja4so")
 top_radius = 0.0
 bottom_radius = 0.4
 height = 0.8
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_ws11t"]
-margin = 0.0
-height = 0.774353
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_cabina"]
 radius = 0.4
+height = 0.8
 
-[node name="Cabina" type="Node3D" unique_id=969967080]
+[node name="Cabina" type="Node3D"]
 script = ExtResource("1_parte")
 NombreParte = "Cabina Básica"
 Tipo = 3
@@ -25,15 +21,15 @@ Diametro = 0.8
 CoeficienteDrag = 0.15
 AreaFrontal = 0.5
 
-[node name="Malla" type="MeshInstance3D" parent="." unique_id=1881327342]
+[node name="Malla" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 mesh = SubResource("CylinderMesh_cabina")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Malla" unique_id=2141347350]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.014593512, 0)
-shape = SubResource("CylinderShape3D_ws11t")
+[node name="Colision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("CylinderShape3D_cabina")
 
-[node name="UnionAbajo" type="Marker3D" parent="." unique_id=2112766528]
+[node name="UnionAbajo" type="Marker3D" parent="."]
 script = ExtResource("2_punto")
 Tipo = 1
 Diametro = 0.8
