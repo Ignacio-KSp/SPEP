@@ -15,14 +15,14 @@ run/main_scene="res://VAB.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+EstadoJuego="*res://EstadoJuego.cs"
+
 [display]
 
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-
-[autoload]
-
-EstadoJuego="*res://EstadoJuego.cs"
 
 [dotnet]
 

@@ -27,8 +27,8 @@ var camara_mapa: Camera3D
 var rotacion_mapa_x: float = 0.0
 var rotacion_mapa_y: float = 0.6
 var distancia_mapa: float = 2800.0
-var distancia_mapa_min: float = 500.0
-var distancia_mapa_max: float = 500000.0
+@export var distancia_mapa_min: float = 500.0
+@export var distancia_mapa_max: float = 500000.0
 var factor_zoom_mapa: float = 0.12
 var arrastrando_izq: bool = false
 var arrastrando_der: bool = false

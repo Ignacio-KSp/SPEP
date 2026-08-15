@@ -151,7 +151,26 @@ public partial class VABManager : Node3D
 		}
 		else
 		{
-			piezaEnMano.GlobalPosition = ProyectarMouseAPlano(camara, mousePos, AlturaFlotando);
+			Vector3 posicionFlotando = ProyectarMouseAPlano(camara, mousePos, AlturaFlotando);
+
+			if (esPrimeraPieza)
+			{
+				// La Cabina (primera pieza) define el "centro" del cohete:
+				// sólo se mueve en altura (Y). X y Z quedan clavados en 0
+				// para que toda la nave, que se arma pegada a ella, quede
+				// centrada en el origen real del RigidBody3D. Si se deja
+				// mover libre en X/Z, el centro de masa real de la nave
+				// termina lejos de ese origen: por eso el cohete "orbita"
+				// un punto que no es su propio eje al rotar, y por eso
+				// aparece corrido de la plataforma al lanzar (la plataforma
+				// posiciona el ORIGEN de la nave, no su geometría visual).
+				piezaEnMano.GlobalPosition = new Vector3(0f, posicionFlotando.Y, 0f);
+			}
+			else
+			{
+				piezaEnMano.GlobalPosition = posicionFlotando;
+			}
+
 			MarcarValidez(esPrimeraPieza);
 		}
 	}

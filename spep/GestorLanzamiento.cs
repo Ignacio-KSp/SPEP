@@ -53,6 +53,8 @@ public partial class GestorLanzamiento : Node3D
 		// vuelo, tiene que estar descongelada o ni la gravedad ni el empuje
 		// del motor la van a mover.
 		nave.Freeze = false;
+		nave.LinearVelocity = Vector3.Zero;
+		nave.AngularVelocity = Vector3.Zero;
 
 		if (basePlataforma != null && planetaNodo != null)
 		{

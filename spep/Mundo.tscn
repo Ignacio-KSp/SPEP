@@ -5,15 +5,16 @@
 [ext_resource type="Script" uid="uid://draumge2n2xss" path="res://camera_seguimiento.gd" id="2_fw4w5"]
 [ext_resource type="Script" uid="uid://bteyrn64dygu5" path="res://HUD.cs" id="5_5ckkb"]
 [ext_resource type="Script" uid="uid://b4ecuqs4llasu" path="res://mapa_orbital.gd" id="6_5ckkb"]
+[ext_resource type="Script" uid="uid://d3o21par2imwx" path="res://OrigenFlotante.cs" id="7_2hh7m"]
 [ext_resource type="Script" uid="uid://bnvfix7f7yxrt" path="res://GestorLanzamiento.cs" id="7_5ckkb"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aou4a"]
 margin = 0.0
-radius = 9994.0
+radius = 599400.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_5ckkb"]
-radius = 10000.0
-height = 20000.0
+radius = 600000.0
+height = 1200000.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aou4a"]
 transparency = 1
@@ -27,22 +28,26 @@ rim_enabled = true
 [sub_resource type="SphereMesh" id="SphereMesh_2hh7m"]
 lightmap_size_hint = Vector2i(34559, 16495)
 material = SubResource("StandardMaterial3D_aou4a")
-radius = 80000.0
-height = 160000.0
+radius = 670000.0
+height = 1340000.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ws11t"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ja4so"]
+size = Vector3(8.416571, 8.636688, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ja4so"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ws11t"]
 material = SubResource("StandardMaterial3D_ja4so")
+size = Vector3(8.404816, 8.809219, 1)
 
 [node name="mundo" type="Node3D" unique_id=1299125237]
 
 [node name="Planeta" type="StaticBody3D" parent="." unique_id=88448087]
 script = ExtResource("1_5ckkb")
+MasaPlaneta = 5.2915793e+22
+RadioPlaneta = 600000.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta" unique_id=2009365636]
 shape = SubResource("SphereShape3D_aou4a")
@@ -56,14 +61,15 @@ mesh = SubResource("SphereMesh_2hh7m")
 script = ExtResource("2_aou4a")
 
 [node name="Base" type="StaticBody3D" parent="Planeta" unique_id=2035427737]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.73806, 10000.161)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.354, 5.859, 599401.94)
 physics_material_override = SubResource("PhysicsMaterial_ws11t")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planeta/Base" unique_id=1630295610]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17863274, 0.08818054, 0)
 shape = SubResource("BoxShape3D_ja4so")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Planeta/Base" unique_id=1109852125]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.015991211)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17753601, 0.07816315, -0.015625)
 mesh = SubResource("BoxMesh_ws11t")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1224654292]
@@ -72,6 +78,9 @@ mesh = SubResource("BoxMesh_ws11t")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96059)
 script = ExtResource("2_fw4w5")
 distancia_min = 0.5
+distancia_max = 1000000.0
+near_clip = 1.0
+far_clip = 1500000.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
 
@@ -116,6 +125,12 @@ text = "SAS: -"
 
 [node name="MapaOrbital" type="Node3D" parent="." unique_id=815434377]
 script = ExtResource("6_5ckkb")
+altura_inicial_mapa = 800000.0
+mapa_far_clip = 2000000.0
+distancia_mapa_max = 3000000.0
 
 [node name="GestorLanzamiento" type="Node3D" parent="." unique_id=100000001]
 script = ExtResource("7_5ckkb")
+
+[node name="OrigenFlotante" type="Node3D" parent="." unique_id=385719699]
+script = ExtResource("7_2hh7m")

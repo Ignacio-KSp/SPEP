@@ -1,81 +1,80 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://bq4rtcn88k5jb"]
 
-[ext_resource type="Script" path="res://VABManager.cs" id="1_vab"]
-[ext_resource type="Script" path="res://Cohete.cs" id="2_cohete"]
+[ext_resource type="Script" uid="uid://dkidnw6e80f8" path="res://VABManager.cs" id="1_vab"]
+[ext_resource type="Script" uid="uid://cinf4ik3nu8le" path="res://Cohete.cs" id="2_cohete"]
 [ext_resource type="PackedScene" path="res://Partes/Tanque.tscn" id="3_tanque"]
 [ext_resource type="PackedScene" path="res://Partes/Motor.tscn" id="4_motor"]
-[ext_resource type="PackedScene" path="res://Partes/Cabina.tscn" id="5_cabina"]
-[ext_resource type="Script" path="res://camara_vab.gd" id="6_camvab"]
+[ext_resource type="PackedScene" uid="uid://61oufcpujw7" path="res://Partes/Cabina.tscn" id="5_cabina"]
+[ext_resource type="Script" uid="uid://dvqk8uei7ug16" path="res://camara_vab.gd" id="6_camvab"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_piso"]
 size = Vector2(10, 10)
 
-[node name="VAB" type="Node3D"]
+[node name="VAB" type="Node3D" unique_id=586679620]
 script = ExtResource("1_vab")
 PiezaTanque = ExtResource("3_tanque")
 PiezaMotor = ExtResource("4_motor")
 PiezaCabina = ExtResource("5_cabina")
 
-[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("objetivo")]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1922131704 node_paths=PackedStringArray("objetivo")]
 transform = Transform3D(1, 0, 0, 0, 0.86602545, 0.5, 0, -0.5, 0.86602545, 0, 2.5, 8)
 current = true
 script = ExtResource("6_camvab")
 objetivo = NodePath("../RaizNave")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=591010206]
 transform = Transform3D(0.7071, -0.5, 0.5, 0, 0.7071, 0.7071, -0.7071, -0.5, 0.5, 0, 3, 0)
 
-[node name="Piso" type="MeshInstance3D" parent="."]
+[node name="Piso" type="MeshInstance3D" parent="." unique_id=1940575657]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
 mesh = SubResource("PlaneMesh_piso")
 
-[node name="RaizNave" type="RigidBody3D" parent="."]
-freeze = true
+[node name="RaizNave" type="RigidBody3D" parent="." unique_id=1429117476]
 can_sleep = false
+freeze = true
 script = ExtResource("2_cohete")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=530191042]
 
-[node name="UI" type="VBoxContainer" parent="CanvasLayer"]
+[node name="UI" type="VBoxContainer" parent="CanvasLayer" unique_id=720075444]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 220.0
 offset_bottom = 400.0
 theme_override_constants/separation = 8
 
-[node name="Titulo" type="Label" parent="CanvasLayer/UI"]
+[node name="Titulo" type="Label" parent="CanvasLayer/UI" unique_id=1542811564]
 layout_mode = 2
 text = "VAB - Piezas"
 
-[node name="TarjetaCabina" type="Button" parent="CanvasLayer/UI"]
-layout_mode = 2
+[node name="TarjetaCabina" type="Button" parent="CanvasLayer/UI" unique_id=461736899]
 custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
 text = "Cabina"
 
-[node name="TarjetaTanque" type="Button" parent="CanvasLayer/UI"]
-layout_mode = 2
+[node name="TarjetaTanque" type="Button" parent="CanvasLayer/UI" unique_id=843615581]
 custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
 text = "Tanque"
 
-[node name="TarjetaMotor" type="Button" parent="CanvasLayer/UI"]
-layout_mode = 2
+[node name="TarjetaMotor" type="Button" parent="CanvasLayer/UI" unique_id=1177997346]
 custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
 text = "Motor"
 
-[node name="Info" type="Label" parent="CanvasLayer/UI"]
+[node name="Info" type="Label" parent="CanvasLayer/UI" unique_id=1975530983]
 layout_mode = 2
 text = "Masa total: 0.0 kg"
 
-[node name="Aviso" type="Label" parent="CanvasLayer/UI"]
+[node name="Aviso" type="Label" parent="CanvasLayer/UI" unique_id=1311684978]
 layout_mode = 2
 autowrap_mode = 2
-text = ""
 
-[node name="BotonReiniciar" type="Button" parent="CanvasLayer/UI"]
+[node name="BotonReiniciar" type="Button" parent="CanvasLayer/UI" unique_id=1654938737]
 layout_mode = 2
 text = "Reiniciar nave"
 
-[node name="BotonLanzar" type="Button" parent="CanvasLayer/UI"]
+[node name="BotonLanzar" type="Button" parent="CanvasLayer/UI" unique_id=1303758378]
 layout_mode = 2
 text = "Guardar y Lanzar"
 
