@@ -1,32 +1,32 @@
 # SPEP - Space Exploration Program
 
-Un simulador de exploración espacial 3D estilo Kerbal Space Program (KSP), hecho en Godot Engine con C#.
+A 3D space exploration simulator inspired by Kerbal Space Program (KSP), built in Godot Engine with C#.
 
-## ¿Qué es?
+## What is it?
 
-SPEP te deja armar cohetes por piezas (cabina, tanque, motor) en un taller de ensamblado (VAB), y lanzarlos a un planeta con física real: gravedad newtoniana, rozamiento atmosférico según altitud y densidad, combustible/oxidante, y control de vuelo tipo KSP (WASD para orientar, Q/E para rotar, SAS para mantener la orientación).
+SPEP lets you build rockets piece by piece (capsule, fuel tank, engine) in an assembly building (VAB), then launch them at a planet simulated with real physics: Newtonian gravity, atmospheric drag based on altitude and air density, fuel/oxidizer consumption, and KSP-style flight controls (WASD to steer, Q/E to roll, SAS to hold attitude).
 
-## Características
+## Features
 
-- **VAB (taller de ensamblado):** arrastrás piezas con el mouse y se pegan solas a los puntos de unión compatibles (como en KSP).
-- **Física orbital real:** gravedad por ley del inverso del cuadrado, mapa orbital con predicción de trayectoria (elipses, escape hiperbólico).
-- **Atmósfera con densidad variable:** el rozamiento depende de la altitud, generando una velocidad terminal realista en vuelo atmosférico.
-- **Escala real:** planeta de 600 km de radio y 70 km de atmósfera, similar a Kerbin.
-- **Sistema de origen flotante:** mantiene la precisión física aunque la nave esté lejos del punto de partida.
+- **VAB (Vehicle Assembly Building):** drag parts with the mouse and they snap onto compatible attachment points automatically, just like KSP.
+- **Real orbital physics:** inverse-square gravity, an orbital map that predicts your trajectory (ellipses, hyperbolic escape paths).
+- **Atmosphere with variable density:** drag depends on altitude, producing a realistic terminal velocity during atmospheric flight.
+- **Real-world scale:** a 600 km radius planet with a 70 km atmosphere, similar to Kerbin.
+- **Floating origin system:** keeps physics precision stable even when the ship is far from the starting point.
 
-## Cómo jugar
+## How to play
 
-1. Andá al VAB (arranca ahí por defecto).
-2. Armá tu nave: Cabina → Tanque → Motor (en ese orden).
-3. "Guardar y Lanzar" para pasar a la plataforma de lanzamiento.
-4. Controles en vuelo:
-   - `Espacio`: encender/apagar motor
-   - `Shift` / `Ctrl`: subir/bajar throttle
-   - `W A S D Q E`: orientar la nave
-   - `T`: SAS (mantener orientación)
-   - `M`: mapa orbital
+1. You start in the VAB by default.
+2. Build your rocket in order: Capsule → Fuel Tank → Engine.
+3. Hit "Save and Launch" to move to the launch pad.
+4. Flight controls:
+   - `Space`: toggle engine on/off
+   - `Shift` / `Ctrl`: increase/decrease throttle
+   - `W A S D Q E`: steer/rotate the ship
+   - `T`: SAS (hold current attitude)
+   - `M`: orbital map
 
-## Tecnología
+## Tech stack
 
-- Motor: Godot 4.7 (C# / Mono)
-- Física: Jolt Physics
+- Engine: Godot 4.7 (C# / Mono)
+- Physics: Jolt Physics
