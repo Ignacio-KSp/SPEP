@@ -35,4 +35,14 @@ public partial class Parte : Node3D
 	// Marker3D (hijo de esta pieza) desde donde sale el chorro. Su eje +Y local
 	// marca la dirección del empuje, igual que hace el Motor del cohete de prueba.
 	[Export] public NodePath PuntoEmpujePath { get; set; }
+
+	[ExportGroup("Si es Módulo de Control (Cabina/Sonda, dejar EsControlador=false si no aplica)")]
+	// Marcá esto en tu Cabina/sonda de mando. El cohete usa los valores del
+	// PRIMER módulo controlador que encuentre entre sus piezas, así distintas
+	// cabinas/sondas pueden tener SAS más fuerte o más débil (como en KSP:
+	// un probe core básico gira más lento que una cabina tripulada avanzada).
+	[Export] public bool EsControlador { get; set; } = false;
+	[Export] public float PotenciaRotacion { get; set; } = 60.0f;
+	[Export] public float SasRigidez { get; set; } = 25.0f;
+	[Export] public float SasAmortiguacion { get; set; } = 12.0f;
 }

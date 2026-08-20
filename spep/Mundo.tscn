@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://b4ecuqs4llasu" path="res://mapa_orbital.gd" id="6_5ckkb"]
 [ext_resource type="Script" uid="uid://d3o21par2imwx" path="res://OrigenFlotante.cs" id="7_2hh7m"]
 [ext_resource type="Script" uid="uid://bnvfix7f7yxrt" path="res://GestorLanzamiento.cs" id="7_5ckkb"]
+[ext_resource type="Script" uid="uid://btai54lq13bkk" path="res://MenuPausa.cs" id="8_t8jxu"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aou4a"]
 margin = 0.0
@@ -79,7 +80,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14526367, 2.2527294, 26.96
 script = ExtResource("2_fw4w5")
 distancia_min = 0.5
 distancia_max = 1000000.0
-near_clip = 1.0
 far_clip = 1500000.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=837709235]
@@ -125,12 +125,52 @@ text = "SAS: -"
 
 [node name="MapaOrbital" type="Node3D" parent="." unique_id=815434377]
 script = ExtResource("6_5ckkb")
-altura_inicial_mapa = 800000.0
 mapa_far_clip = 2000000.0
 distancia_mapa_max = 3000000.0
+altura_inicial_mapa = 800000.0
 
 [node name="GestorLanzamiento" type="Node3D" parent="." unique_id=100000001]
 script = ExtResource("7_5ckkb")
 
 [node name="OrigenFlotante" type="Node3D" parent="." unique_id=385719699]
 script = ExtResource("7_2hh7m")
+
+[node name="MenuPausa" type="CanvasLayer" parent="." unique_id=1561175974]
+script = ExtResource("8_t8jxu")
+
+[node name="Panel" type="Panel" parent="MenuPausa" unique_id=1588726246]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MenuPausa/Panel" unique_id=1639427311]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -72.0
+offset_top = -51.0
+offset_right = 78.0
+offset_bottom = 49.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BotonContinuar" type="Button" parent="MenuPausa/Panel/VBoxContainer" unique_id=1193036099]
+layout_mode = 2
+text = "Continuar"
+
+[node name="BotonArmar" type="Button" parent="MenuPausa/Panel/VBoxContainer" unique_id=1591543877]
+layout_mode = 2
+text = "Volver a armar"
+
+[node name="BotonLanzar" type="Button" parent="MenuPausa/Panel/VBoxContainer" unique_id=2099379658]
+layout_mode = 2
+text = "Volver a lanzar"
+
+[connection signal="pressed" from="MenuPausa/Panel/VBoxContainer/BotonContinuar" to="MenuPausa" method="Continuar"]
+[connection signal="pressed" from="MenuPausa/Panel/VBoxContainer/BotonArmar" to="MenuPausa" method="VolverAArmar"]
+[connection signal="pressed" from="MenuPausa/Panel/VBoxContainer/BotonLanzar" to="MenuPausa" method="VolverALanzar"]

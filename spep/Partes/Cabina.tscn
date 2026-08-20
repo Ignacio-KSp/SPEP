@@ -20,6 +20,10 @@ MasaSeca = 0.3
 Diametro = 0.8
 CoeficienteDrag = 0.15
 AreaFrontal = 0.5
+EsControlador = true
+PotenciaRotacion = 60.0
+SasRigidez = 25.0
+SasAmortiguacion = 12.0
 
 [node name="Malla" type="MeshInstance3D" parent="." unique_id=337773970]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)

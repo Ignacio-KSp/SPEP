@@ -11,20 +11,25 @@ public partial class Cohete : RigidBody3D
 	private Planeta planeta;
 
 	// ======================
-	// CONTROL Y SAS (esto SÍ son ajustes de pilotaje, no de la nave)
+	// CONTROL Y SAS
 	// ======================
 	[ExportGroup("Control")]
-	[Export] public float PotenciaRotacion { get; set; } = 60.0f;
 	[Export] public float ThrottleSpeed { get; set; } = 1.5f;
 	[Export] public float EscalaEmpuje { get; set; } = 2.0f;
 	[Export] public float RatioOxidante { get; set; } = 1.2f;
 
-	// SAS estilo KSP: mantiene una orientación fija en vez de sólo frenar
-	// la rotación. "Rigidez" atrae hacia el objetivo, "Amortiguacion" frena
-	// la velocidad angular. Subilos si el cohete es grande/pesado y el SAS
-	// se siente débil (más masa e inercia = necesita más torque para lo mismo).
-	[Export] public float SasRigidez { get; set; } = 25.0f;
-	[Export] public float SasAmortiguacion { get; set; } = 12.0f;
+	// Valores de respaldo, SÓLO se usan si ninguna pieza está marcada como
+	// "EsControlador" (por ejemplo, mientras probás una nave sin cabina real).
+	// Con una cabina/sonda puesta, el cohete usa los valores de ESA pieza
+	// (ver RecolectarPartes), no estos de acá.
+	[Export] public float PotenciaRotacionRespaldo { get; set; } = 60.0f;
+	[Export] public float SasRigidezRespaldo { get; set; } = 25.0f;
+	[Export] public float SasAmortiguacionRespaldo { get; set; } = 12.0f;
+
+	// Valores REALMENTE en uso ahora mismo (los calcula RecolectarPartes).
+	private float potenciaRotacionActiva = 60.0f;
+	private float sasRigidezActiva = 25.0f;
+	private float sasAmortiguacionActiva = 12.0f;
 
 	// Poné esto en true desde el Inspector para ver en la consola (pestaña
 	// "Salida") la altitud/densidad/fuerza de drag en cada frame, y
@@ -107,6 +112,8 @@ public partial class Cohete : RigidBody3D
 		float dragAcumulado = 0f;
 		motores.Clear();
 
+		bool controladorEncontrado = false;
+
 		foreach (Parte parte in ObtenerPartes(this))
 		{
 			masaSecaTotal += parte.MasaSeca;
@@ -122,6 +129,26 @@ public partial class Cohete : RigidBody3D
 					: null;
 				motores.Add(new MotorActivo { Parte = parte, PuntoEmpuje = punto ?? parte });
 			}
+
+			// Usamos el PRIMER módulo de control que encontremos (cabina o
+			// sonda). Si más adelante tenés varios y querés elegir cuál
+			// "pilotea", esto es lo que habría que cambiar.
+			if (parte.EsControlador && !controladorEncontrado)
+			{
+				potenciaRotacionActiva = parte.PotenciaRotacion;
+				sasRigidezActiva = parte.SasRigidez;
+				sasAmortiguacionActiva = parte.SasAmortiguacion;
+				controladorEncontrado = true;
+			}
+		}
+
+		if (!controladorEncontrado)
+		{
+			// Ninguna pieza está marcada como controlador (ej. probando una
+			// nave sin cabina real): usamos los valores de respaldo.
+			potenciaRotacionActiva = PotenciaRotacionRespaldo;
+			sasRigidezActiva = SasRigidezRespaldo;
+			sasAmortiguacionActiva = SasAmortiguacionRespaldo;
 		}
 
 		dragPromedio = areaFrontalTotal > 0f ? dragAcumulado / areaFrontalTotal : 0.3f;
@@ -247,7 +274,7 @@ public partial class Cohete : RigidBody3D
 
 		if (ultimoInputManual)
 		{
-			Vector3 torque = GlobalTransform.Basis * (torqueLocal * PotenciaRotacion);
+			Vector3 torque = GlobalTransform.Basis * (torqueLocal * potenciaRotacionActiva);
 			ApplyTorque(torque);
 
 			// Mientras piloteás a mano, el SAS "sigue" tu orientación actual.
@@ -273,7 +300,7 @@ public partial class Cohete : RigidBody3D
 
 		// Control PD: te atrae hacia el objetivo (Rigidez) y frena la
 		// velocidad angular (Amortiguación), igual que un reaction wheel.
-		Vector3 torque = direccionCorreccion * angulo * SasRigidez - AngularVelocity * SasAmortiguacion;
+		Vector3 torque = direccionCorreccion * angulo * sasRigidezActiva - AngularVelocity * sasAmortiguacionActiva;
 		ApplyTorque(torque);
 	}
 

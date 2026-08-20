@@ -19,8 +19,8 @@ extends Camera3D
 # AlturaAtmosfera + la altura de tus órbitas más altas. Si algo desaparece a
 # lo lejos (el planeta, la nave, lo que sea), lo primero a revisar es esto:
 # por defecto Godot pone far≈4000, mucho menos que un planeta de 10-80 km.
-@export var near_clip: float = 0.05
-@export var far_clip: float = 300000.0
+@export var near_clip: float = 1.0
+@export var far_clip: float = 2000000.0
 
 var rotacion_x: float = 0.0
 var rotacion_y: float = 0.3
